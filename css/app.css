@@ -1,0 +1,974 @@
+/* ================================================================
+   KeyQuest — App Stylesheet
+   Dark navy theme, iPad landscape optimized
+   ================================================================ */
+
+/* ----------------------------------------------------------------
+   CSS Custom Properties (Design Tokens)
+   ---------------------------------------------------------------- */
+:root {
+  --bg:          #0F1923;
+  --panel:       #162231;
+  --border:      #1E3048;
+  --gold:        #F0A500;
+  --gold-dim:    #A07000;
+  --green:       #00C896;
+  --red:         #E74C3C;
+  --blue:        #4A9EFF;
+  --pink:        #EC407A;
+  --teal:        #00C896;
+  --text:        #E8EEF4;
+  --text-muted:  #6A8099;
+  --text-dim:    #3A5068;
+
+  --radius:      10px;
+  --radius-sm:   6px;
+  --radius-lg:   16px;
+
+  /* Finger colors */
+  --finger-l-pinky:  #9B59B6;
+  --finger-l-ring:   #3498DB;
+  --finger-l-mid:    #1ABC9C;
+  --finger-l-idx:    #2ECC71;
+  --finger-r-idx:    #F1C40F;
+  --finger-r-mid:    #E67E22;
+  --finger-r-ring:   #E74C3C;
+  --finger-r-pinky:  #EC407A;
+  --finger-space:    #8899AA;
+  --finger-support:  #2A3D52;
+
+  --font-ui:   -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Consolas', 'Courier New', monospace;
+}
+
+/* ----------------------------------------------------------------
+   Reset & Base
+   ---------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  /* Prevent iOS tap highlight */
+  -webkit-tap-highlight-color: transparent;
+  /* Prevent text selection during typing */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Utility */
+.hidden { display: none !important; }
+
+/* ================================================================
+   VIEW WRAPPER — fills full screen, each view is full-size
+   ================================================================ */
+.view {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ================================================================
+   HOME SCREEN
+   ================================================================ */
+#view-home {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ---- App Header ---- */
+.home-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 28px 14px;
+  background: var(--panel);
+  border-bottom: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+.home-logo {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.home-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--gold);
+}
+
+.home-tagline {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ---- Levels Container ---- */
+#levels-container {
+  flex: 1;
+  padding: 20px 24px;
+  overflow-y: auto;
+}
+
+.level-section {
+  margin-bottom: 28px;
+}
+
+.level-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.level-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.level-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ---- Lesson Cards Grid ---- */
+.lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
+}
+
+.lesson-card {
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 8px;
+  text-align: center;
+  position: relative;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  min-height: 86px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.lesson-card.unlocked {
+  cursor: pointer;
+}
+
+.lesson-card.unlocked:hover,
+.lesson-card.unlocked:active {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(240, 165, 0, 0.25);
+}
+
+.lesson-card.locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lesson-card.completed {
+  border-color: rgba(0, 200, 150, 0.35);
+}
+
+.card-number {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  line-height: 1;
+}
+
+.card-title {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+  max-width: 100%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.card-stars {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card-star {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.card-star.filled {
+  color: var(--gold);
+  text-shadow: 0 0 6px rgba(240, 165, 0, 0.6);
+}
+
+.card-star.empty {
+  color: var(--text-dim);
+}
+
+.card-wpm {
+  font-size: 0.55rem;
+  color: var(--green);
+  font-weight: 600;
+  margin-left: 3px;
+}
+
+.card-lock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1rem;
+  opacity: 0.5;
+}
+
+/* ---- Stats Bar ---- */
+.stats-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 12px 28px;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.stat-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ================================================================
+   LESSON INTRO SCREEN
+   ================================================================ */
+#view-intro {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--bg);
+}
+
+.intro-container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 32px 28px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 100%;
+}
+
+/* ---- Intro Header row ---- */
+.intro-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.intro-level-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0F1923;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+/* ---- Intro Title & Subtitle ---- */
+.intro-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.15;
+}
+
+.intro-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  max-width: 560px;
+}
+
+/* ---- Keys Section ---- */
+.intro-keys-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.intro-keys-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.intro-keys-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+/* ---- Key Tiles ---- */
+.intro-key-tile {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  background: var(--border);
+  color: var(--text-muted);
+  border: 2px solid #2A3D52;
+  box-shadow: 0 4px 0 #0A1320;
+  transition: transform 0.12s ease;
+}
+
+.intro-key-tile--wide {
+  width: auto;
+  padding: 0 18px;
+  font-size: 0.9rem;
+}
+
+/* Finger-color variants for tiles */
+.intro-key-tile--l-pinky {
+  background: rgba(155, 89, 182, 0.25);
+  color: #C39BD3;
+  border-color: rgba(155, 89, 182, 0.5);
+}
+.intro-key-tile--l-ring {
+  background: rgba(52, 152, 219, 0.25);
+  color: #85C1E9;
+  border-color: rgba(52, 152, 219, 0.5);
+}
+.intro-key-tile--l-mid {
+  background: rgba(26, 188, 156, 0.25);
+  color: #76D7C4;
+  border-color: rgba(26, 188, 156, 0.5);
+}
+.intro-key-tile--l-idx {
+  background: rgba(46, 204, 113, 0.25);
+  color: #82E0AA;
+  border-color: rgba(46, 204, 113, 0.5);
+}
+.intro-key-tile--r-idx {
+  background: rgba(241, 196, 15, 0.25);
+  color: #F9E79F;
+  border-color: rgba(241, 196, 15, 0.5);
+}
+.intro-key-tile--r-mid {
+  background: rgba(230, 126, 34, 0.25);
+  color: #FAD7A0;
+  border-color: rgba(230, 126, 34, 0.5);
+}
+.intro-key-tile--r-ring {
+  background: rgba(231, 76, 60, 0.25);
+  color: #F1948A;
+  border-color: rgba(231, 76, 60, 0.5);
+}
+.intro-key-tile--r-pinky {
+  background: rgba(236, 64, 122, 0.25);
+  color: #F48FB1;
+  border-color: rgba(236, 64, 122, 0.5);
+}
+.intro-key-tile--space {
+  background: rgba(136, 153, 170, 0.2);
+  color: #8899AA;
+  border-color: rgba(136, 153, 170, 0.35);
+}
+
+/* ---- Tip Box ---- */
+.intro-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(74, 158, 255, 0.08);
+  border: 1.5px solid rgba(74, 158, 255, 0.2);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.intro-tip-icon {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  margin-top: 1px;
+}
+
+/* ---- Start Lesson Button ---- */
+.btn-start-lesson {
+  align-self: flex-start;
+  font-size: 1.05rem;
+  font-weight: 800;
+  padding: 14px 36px;
+  border-radius: var(--radius);
+  background: var(--gold);
+  color: #0F1923;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(240, 165, 0, 0.45);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  letter-spacing: 0.01em;
+}
+
+.btn-start-lesson:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(240, 165, 0, 0.6);
+}
+
+.btn-start-lesson:active {
+  transform: scale(0.97);
+}
+
+/* ================================================================
+   LESSON / TYPING SCREEN
+   ================================================================ */
+#view-lesson {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ---- Level accent bar — thin colored stripe at top of lesson view ---- */
+.lesson-level-bar {
+  height: 4px;
+  flex-shrink: 0;
+  background: var(--gold);
+  width: 100%;
+}
+
+/* ---- Top Bar ---- */
+.lesson-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  background: var(--panel);
+  border-bottom: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+.btn-back {
+  background: var(--border);
+  border: none;
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-back:hover {
+  background: #2A3D52;
+}
+
+.lesson-name-bar {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+#lesson-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+#lesson-exercise-counter {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.live-stats {
+  display: flex;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.live-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 52px;
+}
+
+.live-stat-value {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.live-stat-label {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 1px;
+}
+
+/* ---- Progress Bar ---- */
+.progress-bar-wrap {
+  background: var(--border);
+  height: 4px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+#progress-fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.15s ease;
+}
+
+#progress-label {
+  position: absolute;
+  right: 8px;
+  top: 5px;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+/* ---- Typing Area ---- */
+.typing-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 40px;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+#typing-text {
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  line-height: 2.2;
+  letter-spacing: 0.04em;
+  word-break: break-word;
+  text-align: center;
+  max-width: 860px;
+  width: 100%;
+}
+
+/* Character states */
+.char.done {
+  color: var(--green);
+}
+
+.char.current {
+  color: var(--text);
+  background: rgba(240, 165, 0, 0.2);
+  border-bottom: 3px solid var(--gold);
+  border-radius: 3px;
+  padding-bottom: 1px;
+  display: inline-block;
+  min-width: 0.55em;
+}
+
+.char.upcoming {
+  color: var(--text-dim);
+}
+
+/* Error feedback on current char */
+.char.error-flash {
+  background: rgba(231, 76, 60, 0.35) !important;
+  color: var(--red) !important;
+  border-bottom-color: var(--red) !important;
+}
+
+/* Shake animation */
+@keyframes shake {
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-5px); }
+  40%  { transform: translateX(5px); }
+  60%  { transform: translateX(-4px); }
+  80%  { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
+.char.shake {
+  animation: shake 0.35s ease;
+  display: inline-block;
+}
+
+/* ---- Visual Keyboard ---- */
+#keyboard-container {
+  flex-shrink: 0;
+  background: var(--panel);
+  border-top: 2px solid var(--border);
+  padding: 10px 16px 14px;
+  display: flex;
+  justify-content: center;
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  max-width: 860px;
+}
+
+.key-row {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+/* Base key style */
+.key {
+  height: 36px;
+  min-width: 36px;
+  padding: 0 6px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--border);
+  color: var(--text-muted);
+  border: 1px solid #2A3D52;
+  box-shadow: 0 2px 0 #0A1320;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.1s ease;
+  cursor: default;
+  flex-shrink: 0;
+  position: relative;
+  user-select: none;
+}
+
+/* Wide key variants */
+.key-wide-backspace  { min-width: 66px; }
+.key-wide-tab        { min-width: 58px; }
+.key-wide-caps       { min-width: 62px; }
+.key-wide-enter      { min-width: 70px; }
+.key-wide-shift-l    { min-width: 78px; }
+.key-wide-shift-r    { min-width: 78px; }
+.key-wide-ctrl       { min-width: 52px; }
+.key-wide-alt        { min-width: 50px; }
+.key-wide-space      { flex: 1; max-width: 320px; min-width: 200px; }
+
+/* Support keys (backspace, shift, etc.) */
+.key-support {
+  background: #1A2A3A;
+  color: var(--text-dim);
+}
+
+/* Finger color classes */
+.finger-l-pinky { background: rgba(155, 89, 182, 0.3); color: #C39BD3; border-color: rgba(155,89,182,0.4); }
+.finger-l-ring  { background: rgba(52, 152, 219, 0.3); color: #85C1E9; border-color: rgba(52,152,219,0.4); }
+.finger-l-mid   { background: rgba(26, 188, 156, 0.3); color: #76D7C4; border-color: rgba(26,188,156,0.4); }
+.finger-l-idx   { background: rgba(46, 204, 113, 0.3); color: #82E0AA; border-color: rgba(46,204,113,0.4); }
+.finger-r-idx   { background: rgba(241, 196, 15,  0.3); color: #F9E79F; border-color: rgba(241,196,15,0.4); }
+.finger-r-mid   { background: rgba(230, 126, 34,  0.3); color: #FAD7A0; border-color: rgba(230,126,34,0.4); }
+.finger-r-ring  { background: rgba(231, 76,  60,  0.3); color: #F1948A; border-color: rgba(231,76,60,0.4); }
+.finger-r-pinky { background: rgba(236, 64, 122,  0.3); color: #F48FB1; border-color: rgba(236,64,122,0.4); }
+.finger-space   { background: rgba(136, 153, 170, 0.25); color: #8899AA; }
+
+/* Active / highlighted key (current key to press) */
+.key.key-active {
+  background: var(--gold) !important;
+  color: #0F1923 !important;
+  border-color: #FFD040 !important;
+  box-shadow: 0 0 14px rgba(240, 165, 0, 0.7), 0 2px 0 #8A5A00 !important;
+  transform: scale(1.15) translateY(-1px);
+  z-index: 2;
+}
+
+/* Shift key highlighted — slightly different style to indicate it's a modifier */
+.key[data-key="shift-l"].key-active,
+.key[data-key="shift-r"].key-active {
+  background: #FFD040 !important;
+  color: #0F1923 !important;
+  border-color: #FFE580 !important;
+  box-shadow: 0 0 18px rgba(255, 208, 64, 0.75), 0 2px 0 #8A5A00 !important;
+  transform: scale(1.12) translateY(-1px);
+}
+
+/* Correct-flash key */
+@keyframes correctFlash {
+  0%   { background: var(--green); color: #0F1923; transform: scale(1.05); }
+  100% { background: inherit; color: inherit; transform: scale(1); }
+}
+
+.key.key-correct-flash {
+  animation: correctFlash 0.3s ease forwards;
+}
+
+/* ================================================================
+   RESULTS SCREEN
+   ================================================================ */
+#view-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 32px;
+  background: var(--bg);
+}
+
+.results-header {
+  text-align: center;
+}
+
+.results-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: -0.02em;
+}
+
+.results-lesson-name {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ---- Stars ---- */
+.results-stars {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-star {
+  font-size: 3.5rem;
+  color: var(--text-dim);
+  line-height: 1;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.result-star.lit {
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(240, 165, 0, 0.8), 0 0 40px rgba(240, 165, 0, 0.4);
+}
+
+@keyframes starPop {
+  0%   { transform: scale(0.5) rotate(-15deg); opacity: 0; }
+  60%  { transform: scale(1.3) rotate(5deg); }
+  80%  { transform: scale(0.95) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.result-star.animate-in {
+  animation: starPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ---- Result Stats ---- */
+.results-stats {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-stat {
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 28px;
+  text-align: center;
+  min-width: 110px;
+}
+
+.result-stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.result-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+/* ---- Encouragement Message ---- */
+#results-message {
+  font-size: 1rem;
+  color: var(--text);
+  text-align: center;
+  max-width: 440px;
+  line-height: 1.5;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+/* ---- Buttons ---- */
+.results-buttons {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 12px 28px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--gold);
+  color: #0F1923;
+  box-shadow: 0 3px 12px rgba(240, 165, 0, 0.4);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 20px rgba(240, 165, 0, 0.55);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--panel);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-muted);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+/* ================================================================
+   SCROLLBAR STYLING (webkit)
+   ================================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2A3D52; }
+
+/* ================================================================
+   RESPONSIVE — handle narrow iPad orientations
+   ================================================================ */
+@media (max-height: 600px) {
+  .typing-area { padding: 10px 30px; }
+  #typing-text { font-size: 1.4rem; line-height: 2; }
+  .key { height: 30px; min-width: 30px; font-size: 0.62rem; }
+  .key-wide-space { min-width: 160px; }
+  .intro-container { padding: 18px 18px 32px; }
+  .intro-title { font-size: 1.5rem; }
+  .intro-key-tile { width: 48px; height: 48px; font-size: 1.1rem; }
+}
+
+@media (max-width: 768px) {
+  .lessons-grid { grid-template-columns: repeat(4, 1fr); }
+  #typing-text { font-size: 1.3rem; }
+  .key { height: 30px; min-width: 26px; font-size: 0.58rem; }
+  .intro-container { padding: 20px 16px 36px; }
+  .intro-title { font-size: 1.4rem; }
+  .intro-key-tile { width: 44px; height: 44px; font-size: 1rem; }
+}
+
+/* ================================================================
+   ANIMATIONS — general purpose
+   ================================================================ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.view:not(.hidden) {
+  animation: fadeIn 0.2s ease;
+}
+
+/* Intro screen keys pulse animation — subtle attention-grabber */
+@keyframes keyTilePulse {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-3px); }
+}
+
+.intro-key-tile:nth-child(1) { animation: keyTilePulse 2.4s ease-in-out 0.0s infinite; }
+.intro-key-tile:nth-child(2) { animation: keyTilePulse 2.4s ease-in-out 0.2s infinite; }
+.intro-key-tile:nth-child(3) { animation: keyTilePulse 2.4s ease-in-out 0.4s infinite; }
+.intro-key-tile:nth-child(4) { animation: keyTilePulse 2.4s ease-in-out 0.6s infinite; }
+.intro-key-tile:nth-child(5) { animation: keyTilePulse 2.4s ease-in-out 0.8s infinite; }
+.intro-key-tile:nth-child(6) { animation: keyTilePulse 2.4s ease-in-out 1.0s infinite; }
+.intro-key-tile:nth-child(7) { animation: keyTilePulse 2.4s ease-in-out 1.2s infinite; }
+.intro-key-tile:nth-child(8) { animation: keyTilePulse 2.4s ease-in-out 1.4s infinite; }

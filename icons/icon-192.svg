@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- Background -->
+  <rect width="192" height="192" rx="32" fill="#0F1923"/>
+
+  <!-- Keyboard body -->
+  <rect x="20" y="60" width="152" height="80" rx="10" fill="none" stroke="#F0A500" stroke-width="4"/>
+
+  <!-- Key rows - Row 1 (top) -->
+  <rect x="30" y="70" width="14" height="12" rx="2" fill="#F0A500" opacity="0.9"/>
+  <rect x="48" y="70" width="14" height="12" rx="2" fill="#F0A500" opacity="0.9"/>
+  <rect x="66" y="70" width="14" height="12" rx="2" fill="#F0A500" opacity="0.9"/>
+  <rect x="84" y="70" width="14" height="12" rx="2" fill="#F0A500" opacity="0.9"/>
+  <rect x="102" y="70" width="14" height="12" rx="2" fill="#F0A500" opacity="0.9"/>
+  <rect x="120" y="70" width="14" height="12" rx="2" fill="#F0A500" opacity="0.9"/>
+  <rect x="138" y="70" width="14" height="12" rx="2" fill="#F0A500" opacity="0.9"/>
+
+  <!-- Key rows - Row 2 (home) -->
+  <rect x="34" y="87" width="14" height="12" rx="2" fill="#F0A500" opacity="0.7"/>
+  <rect x="52" y="87" width="14" height="12" rx="2" fill="#F0A500" opacity="0.7"/>
+  <rect x="70" y="87" width="14" height="12" rx="2" fill="#F0A500" opacity="0.7"/>
+  <rect x="88" y="87" width="14" height="12" rx="2" fill="#F0A500" opacity="0.7"/>
+  <rect x="106" y="87" width="14" height="12" rx="2" fill="#F0A500" opacity="0.7"/>
+  <rect x="124" y="87" width="14" height="12" rx="2" fill="#F0A500" opacity="0.7"/>
+  <rect x="142" y="87" width="14" height="12" rx="2" fill="#F0A500" opacity="0.7"/>
+
+  <!-- Key rows - Row 3 (bottom) -->
+  <rect x="40" y="104" width="14" height="12" rx="2" fill="#F0A500" opacity="0.5"/>
+  <rect x="58" y="104" width="14" height="12" rx="2" fill="#F0A500" opacity="0.5"/>
+  <rect x="76" y="104" width="14" height="12" rx="2" fill="#F0A500" opacity="0.5"/>
+  <rect x="94" y="104" width="14" height="12" rx="2" fill="#F0A500" opacity="0.5"/>
+  <rect x="112" y="104" width="14" height="12" rx="2" fill="#F0A500" opacity="0.5"/>
+  <rect x="130" y="104" width="14" height="12" rx="2" fill="#F0A500" opacity="0.5"/>
+
+  <!-- Space bar -->
+  <rect x="60" y="120" width="72" height="10" rx="3" fill="#F0A500" opacity="0.8"/>
+</svg>

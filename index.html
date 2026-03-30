@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KeyQuest">
+  <meta name="theme-color" content="#0F1923">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- App Icons for iOS home screen -->
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+
+  <!-- App Stylesheet — no external dependencies -->
+  <link rel="stylesheet" href="css/app.css">
+
+  <title>KeyQuest — Learn to Type</title>
+</head>
+<body>
+
+  <!-- ==============================================================
+       VIEW 1: HOME / DASHBOARD
+       ============================================================== -->
+  <div id="view-home" class="view">
+
+    <!-- Header -->
+    <header class="home-header">
+      <div class="home-logo" aria-hidden="true">⌨️</div>
+      <div>
+        <div class="home-title">KeyQuest</div>
+        <div class="home-tagline">Learn to type — one lesson at a time</div>
+      </div>
+    </header>
+
+    <!-- Levels + Lesson Cards — rendered by JS -->
+    <div id="levels-container" role="main" aria-label="Lessons"></div>
+
+    <!-- Bottom Stats Bar -->
+    <footer class="stats-bar" role="contentinfo">
+      <div class="stat-item">
+        <span class="stat-value" id="stat-completed">0</span>
+        <span class="stat-label">lessons completed</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-wpm">0</span>
+        <span class="stat-label">best WPM</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-accuracy">—</span>
+        <span class="stat-label">avg accuracy</span>
+      </div>
+    </footer>
+
+  </div><!-- /#view-home -->
+
+
+  <!-- ==============================================================
+       VIEW 2: LESSON INTRO SCREEN
+       Shows before the typing screen — mimics typing.com's lesson start card
+       ============================================================== -->
+  <div id="view-intro" class="view hidden">
+    <div class="intro-container">
+
+      <!-- Header row: back button + level badge -->
+      <div class="intro-header">
+        <button id="btn-intro-back" class="btn-back" aria-label="Back to home">← Back</button>
+        <div class="intro-level-badge" id="intro-level-badge">Level 1</div>
+      </div>
+
+      <!-- Lesson title & subtitle/tip -->
+      <h1 class="intro-title" id="intro-title">F and J — Home Position</h1>
+      <p class="intro-subtitle" id="intro-subtitle">Place your fingers on the home row. Feel the bumps on F and J.</p>
+
+      <!-- Keys being introduced -->
+      <div class="intro-keys-section">
+        <div class="intro-keys-label">Keys in this lesson</div>
+        <div class="intro-keys-display" id="intro-keys-display">
+          <!-- Populated by JS: big colored key tiles -->
+        </div>
+      </div>
+
+      <!-- Tip box -->
+      <div class="intro-tip" id="intro-tip">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Start button -->
+      <button class="btn btn-primary btn-start-lesson" id="btn-start-lesson">Start Lesson →</button>
+
+    </div>
+  </div><!-- /#view-intro -->
+
+
+  <!-- ==============================================================
+       VIEW 3: LESSON / TYPING SCREEN
+       ============================================================== -->
+  <div id="view-lesson" class="view hidden">
+
+    <!-- Level accent bar at top -->
+    <div class="lesson-level-bar" id="lesson-level-bar"></div>
+
+    <!-- Top Bar: back button, lesson name, live stats -->
+    <div class="lesson-topbar">
+      <button id="btn-back-home" class="btn-back" aria-label="Back to home">← Home</button>
+
+      <div class="lesson-name-bar">
+        <div id="lesson-title">Lesson</div>
+        <div id="lesson-exercise-counter">Exercise 1 of 4</div>
+      </div>
+
+      <div class="live-stats">
+        <div class="live-stat">
+          <span class="live-stat-value" id="stat-wpm-live">0</span>
+          <span class="live-stat-label">WPM</span>
+        </div>
+        <div class="live-stat">
+          <span class="live-stat-value" id="stat-accuracy-live">100%</span>
+          <span class="live-stat-label">Accuracy</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-wrap" role="progressbar" aria-label="Lesson progress">
+      <div id="progress-fill"></div>
+      <span id="progress-label" aria-live="polite">0 / 0</span>
+    </div>
+
+    <!-- Main Typing Area -->
+    <div class="typing-area" aria-label="Typing exercise">
+      <div id="typing-text" aria-live="off"></div>
+    </div>
+
+    <!-- Visual Keyboard — rendered by keyboard.js -->
+    <div id="keyboard-container" role="img" aria-label="Visual keyboard"></div>
+
+  </div><!-- /#view-lesson -->
+
+
+  <!-- ==============================================================
+       VIEW 4: RESULTS SCREEN
+       ============================================================== -->
+  <div id="view-results" class="view hidden">
+
+    <!-- Header -->
+    <div class="results-header">
+      <div class="results-title">Lesson Complete!</div>
+      <div class="results-lesson-name" id="results-lesson-name"></div>
+    </div>
+
+    <!-- Animated Star Rating -->
+    <div class="results-stars" aria-label="Star rating" role="img">
+      <span class="result-star" aria-label="Star 1">★</span>
+      <span class="result-star" aria-label="Star 2">★</span>
+      <span class="result-star" aria-label="Star 3">★</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="results-stats">
+      <div class="result-stat">
+        <div class="result-stat-value" id="results-wpm">0</div>
+        <div class="result-stat-label">WPM</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-value" id="results-accuracy">0%</div>
+        <div class="result-stat-label">Accuracy</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-value" id="results-time">0s</div>
+        <div class="result-stat-label">Time</div>
+      </div>
+    </div>
+
+    <!-- Encouragement Message -->
+    <p id="results-message"></p>
+
+    <!-- Action Buttons -->
+    <div class="results-buttons">
+      <button id="btn-try-again" class="btn btn-secondary">Try Again</button>
+      <button id="btn-next-lesson" class="btn btn-primary hidden">Next Lesson →</button>
+      <button id="btn-results-home" class="btn btn-ghost">Home</button>
+    </div>
+
+  </div><!-- /#view-results -->
+
+
+  <!-- ==============================================================
+       SCRIPTS — loaded in order (no modules, plain ES5/ES6)
+       lessons.js must come before keyboard.js and app.js
+       ============================================================== -->
+  <script src="js/lessons.js"></script>
+  <script src="js/keyboard.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

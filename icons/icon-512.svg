@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="80" fill="#0F1923"/>
+
+  <!-- Keyboard body -->
+  <rect x="48" y="148" width="416" height="224" rx="24" fill="none" stroke="#F0A500" stroke-width="10"/>
+  <rect x="52" y="152" width="408" height="216" rx="20" fill="#162231"/>
+
+  <!-- Key rows - Row 1 (top) -->
+  <rect x="72" y="170" width="36" height="32" rx="5" fill="#F0A500" opacity="0.9"/>
+  <rect x="116" y="170" width="36" height="32" rx="5" fill="#F0A500" opacity="0.9"/>
+  <rect x="160" y="170" width="36" height="32" rx="5" fill="#F0A500" opacity="0.9"/>
+  <rect x="204" y="170" width="36" height="32" rx="5" fill="#F0A500" opacity="0.9"/>
+  <rect x="248" y="170" width="36" height="32" rx="5" fill="#F0A500" opacity="0.9"/>
+  <rect x="292" y="170" width="36" height="32" rx="5" fill="#F0A500" opacity="0.9"/>
+  <rect x="336" y="170" width="36" height="32" rx="5" fill="#F0A500" opacity="0.9"/>
+  <rect x="380" y="170" width="36" height="32" rx="5" fill="#F0A500" opacity="0.9"/>
+  <rect x="424" y="170" width="40" height="32" rx="5" fill="#F0A500" opacity="0.7"/>
+
+  <!-- Key rows - Row 2 (home) -->
+  <rect x="82" y="212" width="36" height="32" rx="5" fill="#F0A500" opacity="0.75"/>
+  <rect x="126" y="212" width="36" height="32" rx="5" fill="#F0A500" opacity="0.75"/>
+  <rect x="170" y="212" width="36" height="32" rx="5" fill="#F0A500" opacity="0.75"/>
+  <rect x="214" y="212" width="36" height="32" rx="5" fill="#F0A500" opacity="0.75"/>
+  <rect x="258" y="212" width="36" height="32" rx="5" fill="#F0A500" opacity="0.75"/>
+  <rect x="302" y="212" width="36" height="32" rx="5" fill="#F0A500" opacity="0.75"/>
+  <rect x="346" y="212" width="36" height="32" rx="5" fill="#F0A500" opacity="0.75"/>
+  <rect x="390" y="212" width="74" height="32" rx="5" fill="#F0A500" opacity="0.6"/>
+
+  <!-- Key rows - Row 3 (bottom) -->
+  <rect x="98" y="254" width="36" height="32" rx="5" fill="#F0A500" opacity="0.55"/>
+  <rect x="142" y="254" width="36" height="32" rx="5" fill="#F0A500" opacity="0.55"/>
+  <rect x="186" y="254" width="36" height="32" rx="5" fill="#F0A500" opacity="0.55"/>
+  <rect x="230" y="254" width="36" height="32" rx="5" fill="#F0A500" opacity="0.55"/>
+  <rect x="274" y="254" width="36" height="32" rx="5" fill="#F0A500" opacity="0.55"/>
+  <rect x="318" y="254" width="36" height="32" rx="5" fill="#F0A500" opacity="0.55"/>
+  <rect x="362" y="254" width="36" height="32" rx="5" fill="#F0A500" opacity="0.55"/>
+
+  <!-- Space bar -->
+  <rect x="156" y="298" width="200" height="26" rx="8" fill="#F0A500" opacity="0.85"/>
+
+  <!-- Subtle star/sparkle accent top-right -->
+  <circle cx="430" cy="100" r="8" fill="#F0A500" opacity="0.9"/>
+  <circle cx="450" cy="80" r="5" fill="#F0A500" opacity="0.6"/>
+  <circle cx="460" cy="110" r="4" fill="#F0A500" opacity="0.5"/>
+</svg>
