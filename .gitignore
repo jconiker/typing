@@ -1,0 +1,10 @@
+# Typing trainer — static web app. Code only; no data.
+.DS_Store
+node_modules/
+*.log
+# Data / database (none expected, but guard anyway)
+*.db
+*.sqlite
+*.sqlite3
+data/
+.env
