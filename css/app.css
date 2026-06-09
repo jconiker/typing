@@ -461,6 +461,8 @@ html, body {
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .share-btn {
@@ -571,6 +573,34 @@ html, body {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--green);
+}
+
+/* ---- Feedback textarea + note ---- */
+.feedback-textarea {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  min-height: 110px;
+}
+
+.feedback-textarea:focus { border-color: var(--gold); }
+
+.feedback-note {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  background: rgba(74, 158, 255, 0.08);
+  border: 1.5px solid rgba(74, 158, 255, 0.2);
+  border-radius: var(--radius);
+  padding: 12px 14px;
 }
 
 /* ================================================================

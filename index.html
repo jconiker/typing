@@ -62,6 +62,7 @@
         <div class="home-tagline">Learn to type — one lesson at a time</div>
       </div>
       <div class="home-header-actions">
+        <button id="btn-feedback" class="share-btn" aria-label="Send feedback">💬 Feedback</button>
         <button id="btn-share" class="share-btn" aria-label="Share app link">🔗 Share app</button>
         <button id="btn-switch-player" class="profile-chip" aria-label="Switch player">
           <span id="profile-chip-emoji" class="profile-chip-emoji">🙂</span>
@@ -246,6 +247,32 @@
         <button id="btn-share-close" class="btn btn-ghost">Close</button>
       </div>
       <div id="share-toast" class="share-toast hidden">Link copied!</div>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       FEEDBACK OVERLAY — type or talk feedback, send to Joe
+       ============================================================== -->
+  <div id="feedback-overlay" class="share-overlay hidden">
+    <div class="share-card">
+      <div class="share-title">Send Feedback 💬</div>
+      <p class="share-desc">
+        Tell us what you like or what's confusing. Want to talk instead of type?
+        Tap the <strong>🎤 microphone</strong> on your keyboard and just speak.
+      </p>
+      <textarea id="feedback-text" class="feedback-textarea" rows="5"
+        placeholder="Type or talk… e.g. “the numbers go too fast” or “I love the stars!”"></textarea>
+      <div class="share-actions">
+        <button id="btn-feedback-send" class="btn btn-primary">Send to Joe</button>
+        <button id="btn-feedback-share" class="btn btn-secondary hidden">Share…</button>
+        <button id="btn-feedback-save" class="btn btn-secondary">Save</button>
+        <button id="btn-feedback-close" class="btn btn-ghost">Close</button>
+      </div>
+      <div class="feedback-note">
+        💡 When you send feedback, we can improve KeyQuest and push an update right
+        to your device — just reopen the app with internet to get the latest.
+      </div>
+      <div id="feedback-toast" class="share-toast hidden"></div>
     </div>
   </div>
 
