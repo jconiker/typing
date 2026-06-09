@@ -3,7 +3,7 @@
  * Cache-first strategy — serves all app files offline after first install.
  */
 
-const CACHE_NAME = 'keyquest-v5';
+const CACHE_NAME = 'keyquest-v6';
 
 // All files to cache for offline use.
 // Relative paths (./) so the app works from any folder — e.g. GitHub Pages
@@ -16,6 +16,7 @@ const CACHE_FILES = [
   './js/app.js',
   './js/lessons.js',
   './js/keyboard.js',
+  './js/feedback.js',
   './icons/icon-192.svg',
   './icons/icon-512.svg'
 ];
