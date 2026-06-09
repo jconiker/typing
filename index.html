@@ -231,60 +231,16 @@
 
 
   <!-- ==============================================================
-       SHARE OVERLAY — copy/share the app link
-       ============================================================== -->
-  <div id="share-overlay" class="share-overlay hidden">
-    <div class="share-card">
-      <div class="share-title">Share KeyQuest 🔗</div>
-      <p class="share-desc">
-        Send this link by text. On the iPad, open it in Safari, then tap
-        <strong>Share → Add to Home Screen</strong> to install it. Works offline after that.
-      </p>
-      <input id="share-url" class="share-url" readonly aria-label="App link">
-      <div class="share-actions">
-        <button id="btn-share-copy" class="btn btn-primary">Copy link</button>
-        <button id="btn-share-native" class="btn btn-secondary hidden">Share…</button>
-        <button id="btn-share-close" class="btn btn-ghost">Close</button>
-      </div>
-      <div id="share-toast" class="share-toast hidden">Link copied!</div>
-    </div>
-  </div>
-
-  <!-- ==============================================================
-       FEEDBACK OVERLAY — type or talk feedback, send to Joe
-       ============================================================== -->
-  <div id="feedback-overlay" class="share-overlay hidden">
-    <div class="share-card">
-      <div class="share-title">Send Feedback 💬</div>
-      <p class="share-desc">
-        Tell us what you like or what's confusing. Want to talk instead of type?
-        Tap the <strong>🎤 microphone</strong> on your keyboard and just speak.
-      </p>
-      <textarea id="feedback-text" class="feedback-textarea" rows="5"
-        placeholder="Type or talk… e.g. “the numbers go too fast” or “I love the stars!”"></textarea>
-      <div class="share-actions">
-        <button id="btn-feedback-send" class="btn btn-primary">Send to Joe</button>
-        <button id="btn-feedback-share" class="btn btn-secondary hidden">Share…</button>
-        <button id="btn-feedback-save" class="btn btn-secondary">Save</button>
-        <button id="btn-feedback-close" class="btn btn-ghost">Close</button>
-      </div>
-      <div class="feedback-note">
-        💡 When you send feedback, we can improve KeyQuest and push an update right
-        to your device — just reopen the app with internet to get the latest.
-      </div>
-      <div id="feedback-toast" class="share-toast hidden"></div>
-    </div>
-  </div>
-
-  <!-- ==============================================================
        SCRIPTS — loaded in order (no modules, plain ES5/ES6)
        lessons.js must come before keyboard.js and app.js
+       Share + Feedback are handled by the reusable js/feedback.js widget,
+       triggered from the header buttons (noFab — no floating button).
        ============================================================== -->
   <script src="js/lessons.js"></script>
   <script src="js/keyboard.js"></script>
   <script src="js/app.js"></script>
   <script>
-    window.APP_INFO = { name: "KeyQuest", url: "https://jconiker.github.io/typing/", email: "joeconiker@gmail.com" };
+    window.APP_INFO = { name: "KeyQuest", url: "https://jconiker.github.io/typing/", email: "joeconiker@gmail.com", noFab: true };
   </script>
   <script src="js/feedback.js"></script>
 

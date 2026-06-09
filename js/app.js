@@ -470,155 +470,6 @@ function selectProfile(id) {
   renderHome();
 }
 
-// ================================================================
-// SHARE — copy or share the app's own URL (host-agnostic)
-// ================================================================
-
-/** The shareable link = wherever this app is being served from. */
-function getShareUrl() {
-  // Strip any hash/query so the link is clean.
-  return window.location.origin + window.location.pathname;
-}
-
-function openShare() {
-  const overlay = document.getElementById('share-overlay');
-  const urlField = document.getElementById('share-url');
-  const nativeBtn = document.getElementById('btn-share-native');
-
-  urlField.value = getShareUrl();
-  // Native share sheet (iPad/iPhone) — perfect for texting the link
-  nativeBtn.classList.toggle('hidden', !navigator.share);
-
-  overlay.classList.remove('hidden');
-  // Select the URL so it's easy to copy manually too
-  urlField.focus();
-  urlField.select();
-}
-
-function closeShare() {
-  document.getElementById('share-overlay').classList.add('hidden');
-  document.getElementById('share-toast').classList.add('hidden');
-}
-
-function showCopiedToast() {
-  const toast = document.getElementById('share-toast');
-  toast.classList.remove('hidden');
-  setTimeout(function() { toast.classList.add('hidden'); }, 1800);
-}
-
-function copyShareUrl() {
-  const url = getShareUrl();
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(url).then(showCopiedToast).catch(fallbackCopy);
-  } else {
-    fallbackCopy();
-  }
-  function fallbackCopy() {
-    const urlField = document.getElementById('share-url');
-    urlField.focus();
-    urlField.select();
-    try { document.execCommand('copy'); showCopiedToast(); } catch (e) {}
-  }
-}
-
-function nativeShare() {
-  if (!navigator.share) return;
-  navigator.share({
-    title: 'KeyQuest — Learn to Type',
-    text: 'Learn to type with KeyQuest!',
-    url: getShareUrl()
-  }).catch(function() { /* user cancelled — ignore */ });
-}
-
-// ================================================================
-// FEEDBACK — type or talk feedback, send it to Joe by email or the
-// iOS share sheet. Saved locally so it's never lost offline.
-// ================================================================
-
-const FEEDBACK_EMAIL = 'joeconiker@gmail.com';
-const FEEDBACK_KEY = 'keyquest_feedback';
-
-function openFeedback() {
-  document.getElementById('feedback-text').value = '';
-  // Native share sheet (iPad/iPhone) lets them text the feedback to Joe
-  document.getElementById('btn-feedback-share').classList.toggle('hidden', !navigator.share);
-  document.getElementById('feedback-toast').classList.add('hidden');
-  document.getElementById('feedback-overlay').classList.remove('hidden');
-  document.getElementById('feedback-text').focus();
-}
-
-function closeFeedback() {
-  document.getElementById('feedback-overlay').classList.add('hidden');
-}
-
-/** Whose feedback this is — used in the subject/body. */
-function feedbackWho() {
-  const ap = getActiveProfile();
-  return ap ? ap.name : 'Player';
-}
-
-/** Append helpful context (player, app link, date) to the message. */
-function feedbackBody(text) {
-  return text +
-    '\n\n— sent from KeyQuest' +
-    '\nPlayer: ' + feedbackWho() +
-    '\nApp: ' + getShareUrl() +
-    '\nDate: ' + new Date().toLocaleString();
-}
-
-/** Save a backup copy on the device so feedback survives offline. */
-function saveFeedbackLocal(text) {
-  try {
-    const list = JSON.parse(localStorage.getItem(FEEDBACK_KEY) || '[]');
-    list.push({ text: text, who: feedbackWho(), at: new Date().toISOString() });
-    localStorage.setItem(FEEDBACK_KEY, JSON.stringify(list));
-  } catch (e) { /* ignore */ }
-}
-
-function showFeedbackToast(msg) {
-  const t = document.getElementById('feedback-toast');
-  t.textContent = msg;
-  t.classList.remove('hidden');
-  setTimeout(function() { t.classList.add('hidden'); }, 2600);
-}
-
-/** Read + validate the textarea; returns trimmed text or '' (with a toast). */
-function readFeedbackText() {
-  const text = (document.getElementById('feedback-text').value || '').trim();
-  if (!text) showFeedbackToast('Please type or say something first.');
-  return text;
-}
-
-function sendFeedbackEmail() {
-  const text = readFeedbackText();
-  if (!text) return;
-  saveFeedbackLocal(text);
-  const subject = 'KeyQuest feedback from ' + feedbackWho();
-  window.location.href = 'mailto:' + FEEDBACK_EMAIL +
-    '?subject=' + encodeURIComponent(subject) +
-    '&body=' + encodeURIComponent(feedbackBody(text));
-  showFeedbackToast('Opening Mail… thanks! 💛');
-}
-
-function shareFeedback() {
-  const text = readFeedbackText();
-  if (!text) return;
-  saveFeedbackLocal(text);
-  if (navigator.share) {
-    navigator.share({
-      title: 'KeyQuest feedback from ' + feedbackWho(),
-      text: feedbackBody(text)
-    }).catch(function() { /* cancelled — ignore */ });
-  }
-}
-
-function saveFeedbackOnly() {
-  const text = readFeedbackText();
-  if (!text) return;
-  saveFeedbackLocal(text);
-  showFeedbackToast('Saved on this device ✓');
-}
-
 function renderLevelSections(progress) {
   const container = document.getElementById('levels-container');
   container.innerHTML = '';
@@ -1165,23 +1016,13 @@ function setupButtonHandlers() {
     showProfiles('pick');
   });
 
-  // Home — share app link
-  document.getElementById('btn-share').addEventListener('click', openShare);
-  document.getElementById('btn-share-copy').addEventListener('click', copyShareUrl);
-  document.getElementById('btn-share-native').addEventListener('click', nativeShare);
-  document.getElementById('btn-share-close').addEventListener('click', closeShare);
-  document.getElementById('share-overlay').addEventListener('click', function(e) {
-    if (e.target === this) closeShare();
+  // Home — share + feedback are handled by the reusable js/feedback.js widget
+  // (loaded after app.js). Header buttons trigger it; no floating button.
+  document.getElementById('btn-share').addEventListener('click', function() {
+    if (window.Feedback) window.Feedback.shareApp();
   });
-
-  // Home — feedback
-  document.getElementById('btn-feedback').addEventListener('click', openFeedback);
-  document.getElementById('btn-feedback-send').addEventListener('click', sendFeedbackEmail);
-  document.getElementById('btn-feedback-share').addEventListener('click', shareFeedback);
-  document.getElementById('btn-feedback-save').addEventListener('click', saveFeedbackOnly);
-  document.getElementById('btn-feedback-close').addEventListener('click', closeFeedback);
-  document.getElementById('feedback-overlay').addEventListener('click', function(e) {
-    if (e.target === this) closeFeedback();
+  document.getElementById('btn-feedback').addEventListener('click', function() {
+    if (window.Feedback) window.Feedback.open();
   });
 
   // Profile create form — save / cancel

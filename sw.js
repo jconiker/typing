@@ -1,9 +1,10 @@
 /**
  * KeyQuest Service Worker
- * Cache-first strategy — serves all app files offline after first install.
+ * Network-first with cache fallback — fresh files when online (so updates
+ * reach devices), full offline support from cache.
  */
 
-const CACHE_NAME = 'keyquest-v6';
+const CACHE_NAME = 'keyquest-v7';
 
 // All files to cache for offline use.
 // Relative paths (./) so the app works from any folder — e.g. GitHub Pages
