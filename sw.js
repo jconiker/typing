@@ -3,7 +3,7 @@
  * Cache-first strategy — serves all app files offline after first install.
  */
 
-const CACHE_NAME = 'keyquest-v3';
+const CACHE_NAME = 'keyquest-v4';
 
 // All files to cache for offline use.
 // Relative paths (./) so the app works from any folder — e.g. GitHub Pages
@@ -63,41 +63,30 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// ----- Fetch: cache-first strategy -----
+// ----- Fetch: network-first, fall back to cache -----
+// Online: serve the freshest files (so app updates reach devices) and refresh
+// the cache. Offline: serve the cached copy, falling back to the app shell.
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        // Return cached version if available
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        // Otherwise fetch from network and cache it
-        return fetch(event.request)
-          .then((networkResponse) => {
-            // Only cache valid responses
-            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-              return networkResponse;
-            }
-
-            // Clone because response body can only be consumed once
-            const responseToCache = networkResponse.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return networkResponse;
-          })
-          .catch(() => {
-            // Network failed — return offline fallback if available
-            return caches.match('./index.html');
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Cache a fresh copy of valid same-origin responses for offline use
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
           });
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        // Network unavailable — serve from cache, or the app shell as a fallback
+        return caches.match(event.request).then((cached) => {
+          return cached || caches.match('./index.html');
+        });
       })
   );
 });

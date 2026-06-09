@@ -61,11 +61,14 @@
         <div class="home-title">KeyQuest</div>
         <div class="home-tagline">Learn to type — one lesson at a time</div>
       </div>
-      <button id="btn-switch-player" class="profile-chip" aria-label="Switch player">
-        <span id="profile-chip-emoji" class="profile-chip-emoji">🙂</span>
-        <span id="profile-chip-name" class="profile-chip-name">Player</span>
-        <span class="profile-chip-swap" aria-hidden="true">⇄</span>
-      </button>
+      <div class="home-header-actions">
+        <button id="btn-share" class="share-btn" aria-label="Share app link">🔗 Share app</button>
+        <button id="btn-switch-player" class="profile-chip" aria-label="Switch player">
+          <span id="profile-chip-emoji" class="profile-chip-emoji">🙂</span>
+          <span id="profile-chip-name" class="profile-chip-name">Player</span>
+          <span class="profile-chip-swap" aria-hidden="true">⇄</span>
+        </button>
+      </div>
     </header>
 
     <!-- Levels + Lesson Cards — rendered by JS -->
@@ -225,6 +228,26 @@
 
   </div><!-- /#view-results -->
 
+
+  <!-- ==============================================================
+       SHARE OVERLAY — copy/share the app link
+       ============================================================== -->
+  <div id="share-overlay" class="share-overlay hidden">
+    <div class="share-card">
+      <div class="share-title">Share KeyQuest 🔗</div>
+      <p class="share-desc">
+        Send this link by text. On the iPad, open it in Safari, then tap
+        <strong>Share → Add to Home Screen</strong> to install it. Works offline after that.
+      </p>
+      <input id="share-url" class="share-url" readonly aria-label="App link">
+      <div class="share-actions">
+        <button id="btn-share-copy" class="btn btn-primary">Copy link</button>
+        <button id="btn-share-native" class="btn btn-secondary hidden">Share…</button>
+        <button id="btn-share-close" class="btn btn-ghost">Close</button>
+      </div>
+      <div id="share-toast" class="share-toast hidden">Link copied!</div>
+    </div>
+  </div>
 
   <!-- ==============================================================
        SCRIPTS — loaded in order (no modules, plain ES5/ES6)

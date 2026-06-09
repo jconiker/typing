@@ -470,6 +470,66 @@ function selectProfile(id) {
   renderHome();
 }
 
+// ================================================================
+// SHARE — copy or share the app's own URL (host-agnostic)
+// ================================================================
+
+/** The shareable link = wherever this app is being served from. */
+function getShareUrl() {
+  // Strip any hash/query so the link is clean.
+  return window.location.origin + window.location.pathname;
+}
+
+function openShare() {
+  const overlay = document.getElementById('share-overlay');
+  const urlField = document.getElementById('share-url');
+  const nativeBtn = document.getElementById('btn-share-native');
+
+  urlField.value = getShareUrl();
+  // Native share sheet (iPad/iPhone) — perfect for texting the link
+  nativeBtn.classList.toggle('hidden', !navigator.share);
+
+  overlay.classList.remove('hidden');
+  // Select the URL so it's easy to copy manually too
+  urlField.focus();
+  urlField.select();
+}
+
+function closeShare() {
+  document.getElementById('share-overlay').classList.add('hidden');
+  document.getElementById('share-toast').classList.add('hidden');
+}
+
+function showCopiedToast() {
+  const toast = document.getElementById('share-toast');
+  toast.classList.remove('hidden');
+  setTimeout(function() { toast.classList.add('hidden'); }, 1800);
+}
+
+function copyShareUrl() {
+  const url = getShareUrl();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(showCopiedToast).catch(fallbackCopy);
+  } else {
+    fallbackCopy();
+  }
+  function fallbackCopy() {
+    const urlField = document.getElementById('share-url');
+    urlField.focus();
+    urlField.select();
+    try { document.execCommand('copy'); showCopiedToast(); } catch (e) {}
+  }
+}
+
+function nativeShare() {
+  if (!navigator.share) return;
+  navigator.share({
+    title: 'KeyQuest — Learn to Type',
+    text: 'Learn to type with KeyQuest!',
+    url: getShareUrl()
+  }).catch(function() { /* user cancelled — ignore */ });
+}
+
 function renderLevelSections(progress) {
   const container = document.getElementById('levels-container');
   container.innerHTML = '';
@@ -1014,6 +1074,15 @@ function setupButtonHandlers() {
   // Home — switch player
   document.getElementById('btn-switch-player').addEventListener('click', function() {
     showProfiles('pick');
+  });
+
+  // Home — share app link
+  document.getElementById('btn-share').addEventListener('click', openShare);
+  document.getElementById('btn-share-copy').addEventListener('click', copyShareUrl);
+  document.getElementById('btn-share-native').addEventListener('click', nativeShare);
+  document.getElementById('btn-share-close').addEventListener('click', closeShare);
+  document.getElementById('share-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeShare();
   });
 
   // Profile create form — save / cancel

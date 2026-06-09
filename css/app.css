@@ -454,9 +454,39 @@ html, body {
   justify-content: center;
 }
 
+/* ---- Home header actions (share + profile) ---- */
+.home-header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 22px;
+  padding: 8px 14px;
+  cursor: pointer;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: border-color 0.15s ease, transform 0.1s ease, color 0.15s ease;
+}
+
+.share-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+
 /* ---- Profile chip in home header ---- */
 .profile-chip {
-  margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -474,6 +504,74 @@ html, body {
 .profile-chip-emoji { font-size: 1.3rem; line-height: 1; }
 .profile-chip-name { font-size: 0.9rem; font-weight: 700; }
 .profile-chip-swap { font-size: 0.85rem; color: var(--text-muted); }
+
+/* ---- Share overlay ---- */
+.share-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(8, 14, 22, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.share-card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
+}
+
+.share-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.share-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.share-desc strong { color: var(--text); }
+
+.share-url {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--gold);
+  outline: none;
+  width: 100%;
+}
+
+.share-url:focus { border-color: var(--gold); }
+
+.share-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.share-toast {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--green);
+}
 
 /* ================================================================
    LESSON INTRO SCREEN
