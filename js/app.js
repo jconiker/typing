@@ -18,7 +18,22 @@
 // CONSTANTS
 // ================================================================
 
-const STORAGE_KEY = 'keyquest_progress';
+// Legacy single-profile key (migrated into a profile on first run).
+const LEGACY_PROGRESS_KEY = 'keyquest_progress';
+
+// Profile storage keys
+const PROFILES_KEY = 'keyquest_profiles';
+const ACTIVE_KEY   = 'keyquest_active_profile';
+
+// Avatar choices for the "Who's typing?" screen (emoji + accent color)
+const AVATARS = [
+  ['🦊', '#F0A500'], ['🐯', '#E67E22'], ['🐼', '#4A9EFF'], ['🦄', '#EC407A'],
+  ['🚀', '#00C896'], ['🐲', '#2ECC71'], ['🦁', '#F1C40F'], ['🐸', '#1ABC9C'],
+  ['🐵', '#9B59B6'], ['🐶', '#3498DB'], ['🐱', '#E74C3C'], ['🦖', '#16A085']
+];
+
+// Emoji currently selected in the create-profile form
+let selectedEmoji = AVATARS[0][0];
 
 // Star thresholds
 const STAR_1_ACCURACY = 70;   // >= 70% accuracy
@@ -165,16 +180,95 @@ let state = {
 };
 
 // ================================================================
-// PROGRESS PERSISTENCE
+// PROFILES — local, offline "players" so multiple people (son, wife,
+// you) each keep their own stars, WPM, and lesson progress.
 // ================================================================
 
+/** Load the list of profiles. */
+function loadProfiles() {
+  try {
+    const raw = localStorage.getItem(PROFILES_KEY);
+    if (raw) return JSON.parse(raw) || [];
+  } catch (e) {
+    console.warn('[KeyQuest] Could not load profiles:', e);
+  }
+  return [];
+}
+
+/** Save the list of profiles. */
+function saveProfiles(list) {
+  try {
+    localStorage.setItem(PROFILES_KEY, JSON.stringify(list));
+  } catch (e) {
+    console.warn('[KeyQuest] Could not save profiles:', e);
+  }
+}
+
+function getActiveProfileId() {
+  return localStorage.getItem(ACTIVE_KEY) || null;
+}
+
+function setActiveProfileId(id) {
+  if (id) localStorage.setItem(ACTIVE_KEY, id);
+  else localStorage.removeItem(ACTIVE_KEY);
+}
+
+/** Return the active profile object, or null. */
+function getActiveProfile() {
+  const id = getActiveProfileId();
+  if (!id) return null;
+  return loadProfiles().find(function(p) { return p.id === id; }) || null;
+}
+
+/** Create a new profile and return its id. */
+function createProfile(name, emoji, color) {
+  const profiles = loadProfiles();
+  const id = 'p_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 1000);
+  profiles.push({ id: id, name: name, emoji: emoji, color: color });
+  saveProfiles(profiles);
+  return id;
+}
+
+/** Delete a profile and its saved progress. */
+function deleteProfile(id) {
+  const profiles = loadProfiles().filter(function(p) { return p.id !== id; });
+  saveProfiles(profiles);
+  try { localStorage.removeItem('keyquest_progress__' + id); } catch (e) {}
+  if (getActiveProfileId() === id) setActiveProfileId(null);
+}
+
 /**
- * Load progress from localStorage.
+ * One-time migration: if an older single-profile save exists and no
+ * profiles have been created yet, fold it into a "Player 1" profile so
+ * existing progress is never lost.
+ */
+function migrateLegacyProgress() {
+  if (loadProfiles().length > 0) return;
+  const legacy = localStorage.getItem(LEGACY_PROGRESS_KEY);
+  if (legacy) {
+    const id = createProfile('Player 1', '🦊', '#F0A500');
+    try { localStorage.setItem('keyquest_progress__' + id, legacy); } catch (e) {}
+    setActiveProfileId(id);
+  }
+}
+
+// ================================================================
+// PROGRESS PERSISTENCE — namespaced per active profile
+// ================================================================
+
+/** localStorage key for the active profile's progress. */
+function progressKey() {
+  const id = getActiveProfileId();
+  return 'keyquest_progress__' + (id || 'default');
+}
+
+/**
+ * Load progress for the active profile.
  * Returns a normalized progress object.
  */
 function loadProgress() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(progressKey());
     if (raw) {
       const parsed = JSON.parse(raw);
       return {
@@ -189,11 +283,11 @@ function loadProgress() {
 }
 
 /**
- * Save progress to localStorage.
+ * Save progress for the active profile.
  */
 function saveProgress(progress) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    localStorage.setItem(progressKey(), JSON.stringify(progress));
   } catch (e) {
     console.warn('[KeyQuest] Could not save progress:', e);
   }
@@ -239,10 +333,11 @@ function isLessonUnlocked(lessonId, progress) {
 // ================================================================
 
 const views = {
-  home:    document.getElementById('view-home'),
-  intro:   document.getElementById('view-intro'),
-  lesson:  document.getElementById('view-lesson'),
-  results: document.getElementById('view-results')
+  profiles: document.getElementById('view-profiles'),
+  home:     document.getElementById('view-home'),
+  intro:    document.getElementById('view-intro'),
+  lesson:   document.getElementById('view-lesson'),
+  results:  document.getElementById('view-results')
 };
 
 function showView(name) {
@@ -258,9 +353,121 @@ function showView(name) {
 
 function renderHome() {
   const progress = loadProgress();
+  renderProfileChip();
   renderLevelSections(progress);
   renderStatsBar(progress);
   showView('home');
+}
+
+/** Update the header chip that shows whose profile is active. */
+function renderProfileChip() {
+  const ap = getActiveProfile();
+  const emojiEl = document.getElementById('profile-chip-emoji');
+  const nameEl = document.getElementById('profile-chip-name');
+  if (emojiEl) emojiEl.textContent = ap ? ap.emoji : '🙂';
+  if (nameEl) nameEl.textContent = ap ? ap.name : 'Player';
+}
+
+// ================================================================
+// PROFILE PICKER SCREEN
+// ================================================================
+
+function showProfiles(mode) {
+  renderProfiles(mode);
+  showView('profiles');
+}
+
+function renderProfiles(mode) {
+  const grid = document.getElementById('profiles-grid');
+  grid.innerHTML = '';
+
+  const profiles = loadProfiles();
+
+  profiles.forEach(function(p) {
+    const card = document.createElement('div');
+    card.className = 'profile-card';
+    card.style.setProperty('--accent', p.color || 'var(--gold)');
+    card.innerHTML =
+      '<button class="profile-del" aria-label="Remove ' + p.name + '">✕</button>' +
+      '<div class="profile-emoji">' + p.emoji + '</div>' +
+      '<div class="profile-name">' + p.name + '</div>';
+
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('.profile-del')) return;
+      selectProfile(p.id);
+    });
+    card.querySelector('.profile-del').addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (confirm('Remove ' + p.name + '? Their stars and progress will be erased.')) {
+        deleteProfile(p.id);
+        const remaining = loadProfiles();
+        showProfiles(remaining.length ? 'pick' : 'create');
+      }
+    });
+
+    grid.appendChild(card);
+  });
+
+  // "Add player" card
+  const add = document.createElement('div');
+  add.className = 'profile-card profile-add';
+  add.innerHTML =
+    '<div class="profile-emoji">➕</div>' +
+    '<div class="profile-name">Add player</div>';
+  add.addEventListener('click', openCreateForm);
+  grid.appendChild(add);
+
+  const createEl = document.getElementById('profile-create');
+  if (mode === 'create' || profiles.length === 0) {
+    openCreateForm();
+  } else {
+    createEl.classList.add('hidden');
+  }
+}
+
+function openCreateForm() {
+  const createEl = document.getElementById('profile-create');
+  const nameInput = document.getElementById('profile-name-input');
+  const picker = document.getElementById('emoji-picker');
+
+  nameInput.value = '';
+  selectedEmoji = AVATARS[0][0];
+
+  // Build emoji picker
+  picker.innerHTML = '';
+  AVATARS.forEach(function(av, i) {
+    const btn = document.createElement('button');
+    btn.className = 'emoji-option' + (i === 0 ? ' selected' : '');
+    btn.textContent = av[0];
+    btn.setAttribute('data-color', av[1]);
+    btn.addEventListener('click', function() {
+      selectedEmoji = av[0];
+      picker.querySelectorAll('.emoji-option').forEach(function(el) {
+        el.classList.remove('selected');
+      });
+      btn.classList.add('selected');
+    });
+    picker.appendChild(btn);
+  });
+
+  createEl.classList.remove('hidden');
+  nameInput.focus();
+}
+
+function saveNewProfile() {
+  const nameInput = document.getElementById('profile-name-input');
+  const name = (nameInput.value || '').trim() || 'Player';
+  // Find the color paired with the selected emoji
+  const match = AVATARS.find(function(av) { return av[0] === selectedEmoji; });
+  const color = match ? match[1] : '#F0A500';
+  const id = createProfile(name, selectedEmoji, color);
+  setActiveProfileId(id);
+  renderHome();
+}
+
+function selectProfile(id) {
+  setActiveProfileId(id);
+  renderHome();
 }
 
 function renderLevelSections(progress) {
@@ -384,11 +591,32 @@ function showLessonIntro(lessonId) {
   document.getElementById('intro-tip').innerHTML =
     '<span class="intro-tip-icon">💡</span> ' + tipText;
 
-  // Key tiles — show the keys taught in this lesson
+  // Key tiles — show the NEW keys this lesson introduces (not every key
+  // learned so far). Compute the delta vs. the previous lesson. Space is
+  // excluded because it's used from the very first lesson.
   const keysDisplay = document.getElementById('intro-keys-display');
+  const keysLabel = document.getElementById('intro-keys-label');
   keysDisplay.innerHTML = '';
 
-  const keysToShow = lesson.keys.slice(0, 20); // cap at 20 tiles
+  const prevLesson = getLessonById(lessonId - 1);
+  const prevKeys = prevLesson ? prevLesson.keys : [];
+  const newKeys = lesson.keys.filter(function(k) {
+    return k !== ' ' && prevKeys.indexOf(k) === -1;
+  });
+
+  let keysToShow;
+  if (newKeys.length > 0) {
+    keysToShow = newKeys.slice(0, 12);
+    if (keysLabel) {
+      keysLabel.textContent = newKeys.length === 1
+        ? 'New key in this lesson' : 'New keys in this lesson';
+    }
+  } else {
+    // Review / speed lesson — no new keys. Show the keys being practiced.
+    keysToShow = lesson.keys.filter(function(k) { return k !== ' '; }).slice(0, 12);
+    if (keysLabel) keysLabel.textContent = "Keys you'll practice (review)";
+  }
+
   keysToShow.forEach(function(k) {
     const tile = document.createElement('div');
     tile.className = 'intro-key-tile';
@@ -783,6 +1011,26 @@ function setupButtonHandlers() {
     renderHome();
   });
 
+  // Home — switch player
+  document.getElementById('btn-switch-player').addEventListener('click', function() {
+    showProfiles('pick');
+  });
+
+  // Profile create form — save / cancel
+  document.getElementById('btn-create-save').addEventListener('click', saveNewProfile);
+  document.getElementById('btn-create-cancel').addEventListener('click', function() {
+    const profiles = loadProfiles();
+    if (profiles.length) {
+      showProfiles('pick');
+    } else {
+      document.getElementById('profile-create').classList.add('hidden');
+    }
+  });
+  // Enter key in the name field creates the player
+  document.getElementById('profile-name-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); saveNewProfile(); }
+  });
+
   // "Next Lesson" and "Start Lesson" are set up dynamically
 }
 
@@ -799,7 +1047,8 @@ window.addEventListener('keydown', handleKeyDown, { passive: false });
 
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
+    // Relative path so it registers correctly under a subfolder (GitHub Pages).
+    navigator.serviceWorker.register('sw.js')
       .then(function(reg) {
         console.log('[KeyQuest] Service worker registered:', reg.scope);
       })
@@ -817,15 +1066,26 @@ function boot() {
   // Register PWA service worker
   registerServiceWorker();
 
-  // Render the visual keyboard in the lesson view
-  const keyboardContainer = document.getElementById('keyboard-container');
-  renderKeyboard(keyboardContainer);
+  // Render the visual keyboard + finger legend in the lesson view
+  renderKeyboard(document.getElementById('keyboard-container'));
+  renderFingerLegend(document.getElementById('finger-legend'));
 
   // Wire up all static button handlers
   setupButtonHandlers();
 
-  // Start at home screen
-  renderHome();
+  // Bring any old single-profile save forward into a profile
+  migrateLegacyProgress();
+
+  // Decide the first screen: create a player, pick a player, or go home
+  const profiles = loadProfiles();
+  const active = getActiveProfile();
+  if (profiles.length === 0) {
+    showProfiles('create');
+  } else if (!active) {
+    showProfiles('pick');
+  } else {
+    renderHome();
+  }
 }
 
 // Run when DOM is ready

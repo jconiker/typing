@@ -3,19 +3,21 @@
  * Cache-first strategy — serves all app files offline after first install.
  */
 
-const CACHE_NAME = 'keyquest-v2';
+const CACHE_NAME = 'keyquest-v3';
 
-// All files to cache for offline use
+// All files to cache for offline use.
+// Relative paths (./) so the app works from any folder — e.g. GitHub Pages
+// project sites served at username.github.io/typing/ — not just the domain root.
 const CACHE_FILES = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/css/app.css',
-  '/js/app.js',
-  '/js/lessons.js',
-  '/js/keyboard.js',
-  '/icons/icon-192.svg',
-  '/icons/icon-512.svg'
+  './',
+  './index.html',
+  './manifest.json',
+  './css/app.css',
+  './js/app.js',
+  './js/lessons.js',
+  './js/keyboard.js',
+  './icons/icon-192.svg',
+  './icons/icon-512.svg'
 ];
 
 // ----- Install: cache all app files -----
@@ -94,7 +96,7 @@ self.addEventListener('fetch', (event) => {
           })
           .catch(() => {
             // Network failed — return offline fallback if available
-            return caches.match('/index.html');
+            return caches.match('./index.html');
           });
       })
   );

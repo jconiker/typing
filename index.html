@@ -22,6 +22,34 @@
 <body>
 
   <!-- ==============================================================
+       VIEW 0: PROFILE PICKER — "Who's typing?"
+       Local, offline player profiles so son & wife track separately.
+       ============================================================== -->
+  <div id="view-profiles" class="view hidden">
+    <div class="profiles-container">
+      <div class="profiles-logo" aria-hidden="true">⌨️ KeyQuest</div>
+      <h1 class="profiles-title">Who's typing?</h1>
+      <p class="profiles-sub">Pick your player so your stars and speed are saved just for you.</p>
+
+      <!-- Profile cards (+ add) rendered by JS -->
+      <div id="profiles-grid" class="profiles-grid"></div>
+
+      <!-- Create-new-player form (shown when adding / on first run) -->
+      <div id="profile-create" class="profile-create hidden">
+        <input id="profile-name-input" class="profile-name-input"
+               placeholder="Type your name" maxlength="12" autocomplete="off"
+               autocapitalize="words" spellcheck="false">
+        <div class="emoji-picker" id="emoji-picker" aria-label="Pick an avatar"></div>
+        <div class="profile-create-actions">
+          <button id="btn-create-cancel" class="btn btn-ghost">Cancel</button>
+          <button id="btn-create-save" class="btn btn-primary">Create Player</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /#view-profiles -->
+
+
+  <!-- ==============================================================
        VIEW 1: HOME / DASHBOARD
        ============================================================== -->
   <div id="view-home" class="view">
@@ -33,6 +61,11 @@
         <div class="home-title">KeyQuest</div>
         <div class="home-tagline">Learn to type — one lesson at a time</div>
       </div>
+      <button id="btn-switch-player" class="profile-chip" aria-label="Switch player">
+        <span id="profile-chip-emoji" class="profile-chip-emoji">🙂</span>
+        <span id="profile-chip-name" class="profile-chip-name">Player</span>
+        <span class="profile-chip-swap" aria-hidden="true">⇄</span>
+      </button>
     </header>
 
     <!-- Levels + Lesson Cards — rendered by JS -->
@@ -76,7 +109,7 @@
 
       <!-- Keys being introduced -->
       <div class="intro-keys-section">
-        <div class="intro-keys-label">Keys in this lesson</div>
+        <div class="intro-keys-label" id="intro-keys-label">Keys in this lesson</div>
         <div class="intro-keys-display" id="intro-keys-display">
           <!-- Populated by JS: big colored key tiles -->
         </div>
@@ -134,8 +167,14 @@
       <div id="typing-text" aria-live="off"></div>
     </div>
 
+    <!-- Live finger coaching — "Use your left index finger" -->
+    <div id="finger-hint" class="finger-hint" aria-live="polite"></div>
+
     <!-- Visual Keyboard — rendered by keyboard.js -->
     <div id="keyboard-container" role="img" aria-label="Visual keyboard"></div>
+
+    <!-- Finger color legend — rendered by keyboard.js -->
+    <div id="finger-legend" class="finger-legend" aria-label="Finger guide"></div>
 
   </div><!-- /#view-lesson -->
 

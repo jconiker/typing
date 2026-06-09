@@ -279,6 +279,203 @@ html, body {
 }
 
 /* ================================================================
+   PROFILE PICKER — "Who's typing?"
+   ================================================================ */
+#view-profiles {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--bg);
+}
+
+.profiles-container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 28px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 100%;
+  justify-content: center;
+}
+
+.profiles-logo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
+
+.profiles-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.profiles-sub {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  max-width: 440px;
+  line-height: 1.5;
+}
+
+.profiles-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.profile-card {
+  --accent: var(--gold);
+  position: relative;
+  width: 120px;
+  min-height: 120px;
+  background: var(--panel);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.profile-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.profile-emoji {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.profile-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  max-width: 104px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-card.profile-add {
+  border-style: dashed;
+  background: transparent;
+}
+
+.profile-card.profile-add .profile-emoji { color: var(--text-muted); }
+.profile-card.profile-add .profile-name { color: var(--text-muted); }
+
+.profile-del {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(231, 76, 60, 0.18);
+  color: var(--red);
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.profile-card:hover .profile-del { opacity: 1; }
+
+/* ---- Create-profile form ---- */
+.profile-create {
+  margin-top: 32px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.profile-name-input {
+  font-family: var(--font-ui);
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+}
+
+.profile-name-input:focus {
+  border-color: var(--gold);
+}
+
+.emoji-picker {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.emoji-option {
+  font-size: 1.6rem;
+  padding: 6px 0;
+  border-radius: var(--radius-sm);
+  border: 2px solid transparent;
+  background: var(--bg);
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.1s ease;
+}
+
+.emoji-option:hover { transform: scale(1.1); }
+.emoji-option.selected {
+  border-color: var(--gold);
+  background: rgba(240, 165, 0, 0.12);
+}
+
+.profile-create-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* ---- Profile chip in home header ---- */
+.profile-chip {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 22px;
+  padding: 6px 12px 6px 8px;
+  cursor: pointer;
+  color: var(--text);
+  font-family: var(--font-ui);
+  transition: border-color 0.15s ease, transform 0.1s ease;
+}
+
+.profile-chip:hover { border-color: var(--gold); transform: translateY(-1px); }
+.profile-chip-emoji { font-size: 1.3rem; line-height: 1; }
+.profile-chip-name { font-size: 0.9rem; font-weight: 700; }
+.profile-chip-swap { font-size: 0.85rem; color: var(--text-muted); }
+
+/* ================================================================
    LESSON INTRO SCREEN
    ================================================================ */
 #view-intro {
@@ -650,6 +847,62 @@ html, body {
   display: inline-block;
 }
 
+/* ---- Live finger coaching line ---- */
+.finger-hint {
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  padding: 4px 0 8px;
+  min-height: 1.4em;
+}
+
+.finger-hint strong {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* ---- Finger color legend ---- */
+.finger-legend {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 14px;
+  padding: 8px 16px 12px;
+  background: var(--panel);
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.legend-label {
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* Solid finger colors for legend dots (the keyboard uses faded fills) */
+.legend-dot.finger-l-pinky { background: var(--finger-l-pinky); }
+.legend-dot.finger-l-ring  { background: var(--finger-l-ring); }
+.legend-dot.finger-l-mid   { background: var(--finger-l-mid); }
+.legend-dot.finger-l-idx   { background: var(--finger-l-idx); }
+.legend-dot.finger-r-idx   { background: var(--finger-r-idx); }
+.legend-dot.finger-r-mid   { background: var(--finger-r-mid); }
+.legend-dot.finger-r-ring  { background: var(--finger-r-ring); }
+.legend-dot.finger-r-pinky { background: var(--finger-r-pinky); }
+.legend-dot.finger-space   { background: var(--finger-space); }
+
 /* ---- Visual Keyboard ---- */
 #keyboard-container {
   flex-shrink: 0;
@@ -928,13 +1181,16 @@ html, body {
    RESPONSIVE — handle narrow iPad orientations
    ================================================================ */
 @media (max-height: 600px) {
-  .typing-area { padding: 10px 30px; }
+  .typing-area { padding: 8px 30px; }
   #typing-text { font-size: 1.4rem; line-height: 2; }
   .key { height: 30px; min-width: 30px; font-size: 0.62rem; }
   .key-wide-space { min-width: 160px; }
   .intro-container { padding: 18px 18px 32px; }
   .intro-title { font-size: 1.5rem; }
   .intro-key-tile { width: 48px; height: 48px; font-size: 1.1rem; }
+  .finger-hint { font-size: 0.85rem; padding: 2px 0 4px; }
+  .finger-legend { padding: 4px 12px 6px; gap: 4px 10px; }
+  .legend-label { font-size: 0.6rem; }
 }
 
 @media (max-width: 768px) {

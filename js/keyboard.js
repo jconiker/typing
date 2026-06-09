@@ -51,6 +51,53 @@ const FINGER_MAP = {
 };
 
 // ---------------------------------------------------------------
+// Readable finger names — used for the live "Use your ___ finger" hint
+// and the on-screen legend. Keyed by the finger CSS class.
+// ---------------------------------------------------------------
+const FINGER_NAMES = {
+  'finger-l-pinky': 'left pinky',
+  'finger-l-ring':  'left ring finger',
+  'finger-l-mid':   'left middle finger',
+  'finger-l-idx':   'left index finger',
+  'finger-r-idx':   'right index finger',
+  'finger-r-mid':   'right middle finger',
+  'finger-r-ring':  'right ring finger',
+  'finger-r-pinky': 'right pinky',
+  'finger-space':   'thumb'
+};
+
+// Short labels for the compact legend row
+const FINGER_LEGEND = [
+  ['finger-l-pinky', 'L pinky'],
+  ['finger-l-ring',  'L ring'],
+  ['finger-l-mid',   'L middle'],
+  ['finger-l-idx',   'L index'],
+  ['finger-r-idx',   'R index'],
+  ['finger-r-mid',   'R middle'],
+  ['finger-r-ring',  'R ring'],
+  ['finger-r-pinky', 'R pinky'],
+  ['finger-space',   'Thumbs']
+];
+
+// ---------------------------------------------------------------
+// getFingerName(char)
+// Returns a friendly description of which finger types `char`,
+// e.g. "left index finger". Adds "+ Shift" for capital letters.
+// ---------------------------------------------------------------
+function getFingerName(char) {
+  if (!char) return '';
+  if (char === ' ') return 'thumb';
+  const lower = char.toLowerCase();
+  const fingerClass = FINGER_MAP[lower];
+  if (!fingerClass) return '';
+  let name = FINGER_NAMES[fingerClass] || '';
+  if (char >= 'A' && char <= 'Z') {
+    name += ' + Shift';
+  }
+  return name;
+}
+
+// ---------------------------------------------------------------
 // RIGHT_HAND_KEYS — keys typed by the right hand.
 // When these are uppercase, the LEFT Shift key is used.
 // All other letter/symbol keys use RIGHT Shift.
@@ -187,6 +234,7 @@ function _getShiftKeyForChar(char) {
 // ---------------------------------------------------------------
 function highlightKey(char) {
   clearHighlights();
+  updateFingerHint(char);
 
   if (char === ' ') {
     const el = keyElements[' '];
@@ -245,5 +293,44 @@ function flashKeyCorrect(char) {
 function clearHighlights() {
   Object.values(keyElements).forEach((el) => {
     el.classList.remove('key-active');
+  });
+}
+
+// ---------------------------------------------------------------
+// updateFingerHint(char)
+// Updates the "Use your ___ finger" coaching line for the next key.
+// ---------------------------------------------------------------
+function updateFingerHint(char) {
+  const hintEl = document.getElementById('finger-hint');
+  if (!hintEl) return;
+  const name = getFingerName(char);
+  if (char === ' ') {
+    hintEl.innerHTML = 'Press <strong>Space</strong> with your <strong>thumb</strong>';
+  } else if (name) {
+    hintEl.innerHTML = 'Use your <strong>' + name + '</strong>';
+  } else {
+    hintEl.innerHTML = '';
+  }
+}
+
+// ---------------------------------------------------------------
+// renderFingerLegend(containerEl)
+// Builds the compact finger-color legend so learners know what
+// each keyboard color means (green = left index, etc.).
+// ---------------------------------------------------------------
+function renderFingerLegend(containerEl) {
+  if (!containerEl) return;
+  containerEl.innerHTML = '';
+  FINGER_LEGEND.forEach(([fingerClass, label]) => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    const dot = document.createElement('span');
+    dot.className = 'legend-dot ' + fingerClass;
+    const txt = document.createElement('span');
+    txt.className = 'legend-label';
+    txt.textContent = label;
+    item.appendChild(dot);
+    item.appendChild(txt);
+    containerEl.appendChild(item);
   });
 }
