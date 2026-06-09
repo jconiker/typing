@@ -153,24 +153,25 @@ html, body {
 /* ---- Lesson Cards Grid ---- */
 .lessons-grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 10px;
+  /* Bigger, more legible cards that wrap responsively (iPad portrait/landscape) */
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 12px;
 }
 
 .lesson-card {
   background: var(--panel);
-  border: 1.5px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius);
-  padding: 10px 8px;
+  padding: 14px 12px;
   text-align: center;
   position: relative;
   transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-  min-height: 86px;
+  min-height: 108px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .lesson-card.unlocked {
@@ -180,29 +181,60 @@ html, body {
 .lesson-card.unlocked:hover,
 .lesson-card.unlocked:active {
   border-color: var(--gold);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(240, 165, 0, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(240, 165, 0, 0.3);
 }
 
 .lesson-card.locked {
-  opacity: 0.45;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .lesson-card.completed {
-  border-color: rgba(0, 200, 150, 0.35);
+  border-color: rgba(0, 200, 150, 0.45);
+}
+
+/* "Start here" — the next lesson to do, clearly highlighted */
+.lesson-card.next-up {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, rgba(240,165,0,0.12), var(--panel));
+  box-shadow: 0 0 0 1px var(--gold), 0 6px 22px rgba(240, 165, 0, 0.28);
+  animation: nextPulse 2s ease-in-out infinite;
+}
+
+@keyframes nextPulse {
+  0%, 100% { box-shadow: 0 0 0 1px var(--gold), 0 6px 22px rgba(240, 165, 0, 0.22); }
+  50%      { box-shadow: 0 0 0 2px var(--gold), 0 8px 28px rgba(240, 165, 0, 0.45); }
+}
+
+.card-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: #0F1923;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(240, 165, 0, 0.5);
 }
 
 .card-number {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--text-dim);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text);
   line-height: 1;
 }
 
 .card-title {
-  font-size: 0.65rem;
-  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
   line-height: 1.3;
   max-width: 100%;
   overflow: hidden;
@@ -214,13 +246,14 @@ html, body {
 .card-stars {
   display: flex;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
   flex-wrap: wrap;
   justify-content: center;
+  margin-top: 2px;
 }
 
 .card-star {
-  font-size: 0.75rem;
+  font-size: 1rem;
   line-height: 1;
 }
 
@@ -234,19 +267,18 @@ html, body {
 }
 
 .card-wpm {
-  font-size: 0.55rem;
+  font-size: 0.68rem;
   color: var(--green);
-  font-weight: 600;
-  margin-left: 3px;
+  font-weight: 700;
+  margin-left: 5px;
 }
 
 .card-lock {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 1rem;
-  opacity: 0.5;
+  top: 8px;
+  right: 8px;
+  font-size: 1.05rem;
+  opacity: 0.6;
 }
 
 /* ---- Stats Bar ---- */
@@ -1226,7 +1258,8 @@ html, body {
 }
 
 @media (max-width: 768px) {
-  .lessons-grid { grid-template-columns: repeat(4, 1fr); }
+  /* Let the auto-fill grid pick the column count; just shrink the min a bit */
+  .lessons-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   #typing-text { font-size: 1.3rem; }
   .key { height: 30px; min-width: 26px; font-size: 0.58rem; }
   .intro-container { padding: 20px 16px 36px; }
@@ -1260,3 +1293,141 @@ html, body {
 .intro-key-tile:nth-child(6) { animation: keyTilePulse 2.4s ease-in-out 1.0s infinite; }
 .intro-key-tile:nth-child(7) { animation: keyTilePulse 2.4s ease-in-out 1.2s infinite; }
 .intro-key-tile:nth-child(8) { animation: keyTilePulse 2.4s ease-in-out 1.4s infinite; }
+
+/* ================================================================
+   CREDIT LINE — "Developed by Coniker Systems"
+   ================================================================ */
+.app-credit {
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  padding: 8px 12px 10px;
+  background: var(--panel);
+}
+
+.profiles-container .app-credit {
+  background: transparent;
+  margin-top: 28px;
+}
+
+/* ================================================================
+   ABOUT OVERLAY
+   ================================================================ */
+.about-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(8, 14, 22, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.about-card {
+  width: 100%;
+  max-width: 540px;
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 26px 28px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.about-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.about-logo { font-size: 2.2rem; line-height: 1; }
+
+.about-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1.1;
+}
+
+.about-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.about-x {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.about-x:hover { color: var(--text); }
+
+.about-lead {
+  font-size: 1.02rem;
+  color: var(--text);
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+
+.about-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.about-list li {
+  display: flex;
+  gap: 12px;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.about-list li .ab-ico {
+  flex-shrink: 0;
+  font-size: 1.2rem;
+  line-height: 1.3;
+}
+
+.about-list li .ab-txt { flex: 1; }
+
+.about-list li strong { color: var(--text); }
+
+.about-tip {
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.55;
+  background: rgba(74, 158, 255, 0.08);
+  border: 1.5px solid rgba(74, 158, 255, 0.2);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 20px;
+}
+
+.about-tip strong { color: var(--gold); }
+
+#btn-about-ok {
+  width: 100%;
+}
+
+.about-credit {
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  margin-top: 16px;
+}

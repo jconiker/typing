@@ -45,6 +45,8 @@
           <button id="btn-create-save" class="btn btn-primary">Create Player</button>
         </div>
       </div>
+
+      <div class="app-credit">Developed by Coniker Systems</div>
     </div>
   </div><!-- /#view-profiles -->
 
@@ -62,6 +64,7 @@
         <div class="home-tagline">Learn to type — one lesson at a time</div>
       </div>
       <div class="home-header-actions">
+        <button id="btn-about" class="share-btn" aria-label="About this app">ℹ️ About</button>
         <button id="btn-feedback" class="share-btn" aria-label="Send feedback">💬 Feedback</button>
         <button id="btn-share" class="share-btn" aria-label="Share app link">🔗 Share app</button>
         <button id="btn-switch-player" class="profile-chip" aria-label="Switch player">
@@ -90,6 +93,9 @@
         <span class="stat-label">avg accuracy</span>
       </div>
     </footer>
+
+    <!-- Credit -->
+    <div class="app-credit">Developed by Coniker Systems</div>
 
   </div><!-- /#view-home -->
 
@@ -229,6 +235,42 @@
 
   </div><!-- /#view-results -->
 
+
+  <!-- ==============================================================
+       ABOUT OVERLAY — what KeyQuest is, in simple terms
+       ============================================================== -->
+  <div id="about-overlay" class="about-overlay hidden">
+    <div class="about-card">
+      <div class="about-head">
+        <div class="about-logo" aria-hidden="true">⌨️</div>
+        <div>
+          <div class="about-title">KeyQuest</div>
+          <div class="about-subtitle">Learn to type the right way</div>
+        </div>
+        <button id="btn-about-close" class="about-x" aria-label="Close">×</button>
+      </div>
+
+      <p class="about-lead">
+        KeyQuest is a fun, step-by-step way to learn <strong>touch typing</strong> —
+        typing without looking down at your hands.
+      </p>
+
+      <ul class="about-list">
+        <li><span class="ab-ico">🎯</span><span class="ab-txt">Start on the <strong>home row</strong>, then add new keys, real words, sentences, numbers, and capital letters — like a real typing course.</span></li>
+        <li><span class="ab-ico">⌨️</span><span class="ab-txt">The on-screen keyboard <strong>lights up the next key</strong> and tells you <strong>which finger</strong> to use, so you learn the correct habits.</span></li>
+        <li><span class="ab-ico">⭐</span><span class="ab-txt">Earn up to <strong>3 stars</strong> per lesson, beat your best <strong>speed (WPM)</strong>, and watch your <strong>accuracy</strong> climb.</span></li>
+        <li><span class="ab-ico">👨‍👩‍👧</span><span class="ab-txt">Each player has their <strong>own progress</strong>, so the whole family can practice.</span></li>
+        <li><span class="ab-ico">📶</span><span class="ab-txt">Once added to your Home Screen, it <strong>works offline</strong> — no internet needed.</span></li>
+      </ul>
+
+      <p class="about-tip">
+        💡 Tip: rest your pointer fingers on <strong>F</strong> and <strong>J</strong> (feel the little bumps) and keep your eyes on the screen, not your hands.
+      </p>
+
+      <button id="btn-about-ok" class="btn btn-primary">Got it — let's type!</button>
+      <div class="about-credit">Developed by Coniker Systems</div>
+    </div>
+  </div>
 
   <!-- ==============================================================
        SCRIPTS — loaded in order (no modules, plain ES5/ES6)

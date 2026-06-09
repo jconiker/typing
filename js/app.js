@@ -470,9 +470,39 @@ function selectProfile(id) {
   renderHome();
 }
 
+// ================================================================
+// ABOUT
+// ================================================================
+
+function openAbout() {
+  document.getElementById('about-overlay').classList.remove('hidden');
+}
+
+function closeAbout() {
+  document.getElementById('about-overlay').classList.add('hidden');
+}
+
+/**
+ * The next lesson to do = the first unlocked lesson that isn't finished yet.
+ * Used to show a "Start here" guide so the learner always knows where to go.
+ */
+function getNextLessonId(progress) {
+  for (let i = 0; i < LESSONS.length; i++) {
+    const lesson = LESSONS[i];
+    const result = progress.completedLessons[lesson.id];
+    const done = result && result.stars >= 1;
+    if (isLessonUnlocked(lesson.id, progress) && !done) {
+      return lesson.id;
+    }
+  }
+  return null; // everything finished
+}
+
 function renderLevelSections(progress) {
   const container = document.getElementById('levels-container');
   container.innerHTML = '';
+
+  const nextId = getNextLessonId(progress);
 
   LEVELS.forEach(function(level) {
     const levelEl = document.createElement('div');
@@ -493,7 +523,7 @@ function renderLevelSections(progress) {
 
     const lessons = getLessonsForLevel(level.id);
     lessons.forEach(function(lesson) {
-      const card = createLessonCard(lesson, progress, color);
+      const card = createLessonCard(lesson, progress, color, nextId);
       grid.appendChild(card);
     });
 
@@ -502,14 +532,18 @@ function renderLevelSections(progress) {
   });
 }
 
-function createLessonCard(lesson, progress, accentColor) {
+function createLessonCard(lesson, progress, accentColor, nextId) {
   const unlocked = isLessonUnlocked(lesson.id, progress);
   const result = progress.completedLessons[lesson.id];
   const stars = result ? result.stars : 0;
   const completed = stars >= 1;
+  const isNext = lesson.id === nextId;
 
   const card = document.createElement('div');
-  card.className = 'lesson-card' + (unlocked ? ' unlocked' : ' locked') + (completed ? ' completed' : '');
+  card.className = 'lesson-card'
+    + (unlocked ? ' unlocked' : ' locked')
+    + (completed ? ' completed' : '')
+    + (isNext ? ' next-up' : '');
 
   // Apply level accent color to completed cards
   if (completed && accentColor) {
@@ -528,6 +562,7 @@ function createLessonCard(lesson, progress, accentColor) {
     : '';
 
   card.innerHTML = `
+    ${isNext ? '<div class="card-badge">Start here</div>' : ''}
     <div class="card-number">${lesson.id}</div>
     <div class="card-title">${lesson.title}</div>
     <div class="card-stars">${starsHtml}${wpmBadge}</div>
@@ -1023,6 +1058,14 @@ function setupButtonHandlers() {
   });
   document.getElementById('btn-feedback').addEventListener('click', function() {
     if (window.Feedback) window.Feedback.open();
+  });
+
+  // Home — about
+  document.getElementById('btn-about').addEventListener('click', openAbout);
+  document.getElementById('btn-about-close').addEventListener('click', closeAbout);
+  document.getElementById('btn-about-ok').addEventListener('click', closeAbout);
+  document.getElementById('about-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeAbout();
   });
 
   // Profile create form — save / cancel
