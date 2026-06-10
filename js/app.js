@@ -18,6 +18,12 @@
 // CONSTANTS
 // ================================================================
 
+// App version — shown in the footer so a user can tell you which build they
+// have. IMPORTANT: when you ship an update, bump this AND the ?v= query on the
+// <script>/<link> tags in index.html (they cache-bust assets) AND CACHE_NAME
+// in sw.js. Keeping them in lockstep is what guarantees devices get the update.
+const APP_VERSION = '1.0.0';
+
 // Legacy single-profile key (migrated into a profile on first run).
 const LEGACY_PROGRESS_KEY = 'keyquest_progress';
 
@@ -34,6 +40,10 @@ const AVATARS = [
 
 // Emoji currently selected in the create-profile form
 let selectedEmoji = AVATARS[0][0];
+
+// Cap WPM at a sane maximum so a quick burst or key-mash can't post a silly
+// number (the sustained human record is ~210). Keeps results/certificates real.
+const MAX_WPM = 250;
 
 // Star thresholds
 const STAR_1_ACCURACY = 70;   // >= 70% accuracy
@@ -170,6 +180,11 @@ let state = {
   startTime: null,
   timerInterval: null,
 
+  // Exam mode: null for normal lessons, or the active exam object.
+  // examScoreMode is 'accuracy' or 'speed' when an exam is running.
+  activeExam: null,
+  examScoreMode: null,
+
   // Results for current lesson attempt
   results: {
     wpm: 0,
@@ -178,6 +193,11 @@ let state = {
     stars: 0
   }
 };
+
+/** True while an exam (not a normal lesson) is being taken. */
+function inExam() {
+  return !!state.activeExam;
+}
 
 // ================================================================
 // PROFILES — local, offline "players" so multiple people (son, wife,
@@ -273,13 +293,15 @@ function loadProgress() {
       const parsed = JSON.parse(raw);
       return {
         completedLessons: parsed.completedLessons || {},
-        totalSessions: parsed.totalSessions || 0
+        totalSessions: parsed.totalSessions || 0,
+        exams: parsed.exams || {},
+        certifiedAt: parsed.certifiedAt || null
       };
     }
   } catch (e) {
     console.warn('[KeyQuest] Could not load progress:', e);
   }
-  return { completedLessons: {}, totalSessions: 0 };
+  return { completedLessons: {}, totalSessions: 0, exams: {}, certifiedAt: null };
 }
 
 /**
@@ -297,7 +319,7 @@ function saveProgress(progress) {
  * Record a lesson completion.
  * Only updates if the new result is better (more stars, or same stars + more WPM).
  */
-function recordLessonCompletion(lessonId, stars, wpm, accuracy) {
+function recordLessonCompletion(lessonId, stars, wpm, accuracy, seconds) {
   const progress = loadProgress();
   const existing = progress.completedLessons[lessonId];
 
@@ -310,12 +332,71 @@ function recordLessonCompletion(lessonId, stars, wpm, accuracy) {
       stars,
       wpm: Math.round(wpm),
       accuracy: Math.round(accuracy),
+      seconds: Math.round(seconds || 0),
       completedAt: new Date().toISOString()
     };
   }
 
   progress.totalSessions = (progress.totalSessions || 0) + 1;
   saveProgress(progress);
+}
+
+// ================================================================
+// EXAM PROGRESS + UNLOCKING
+// ================================================================
+
+/** Record an exam attempt; keeps the best result and a "passed" flag. */
+function recordExamResult(examId, mode, passed, wpm, accuracy, seconds) {
+  const progress = loadProgress();
+  if (!progress.exams) progress.exams = {};
+  const prev = progress.exams[examId] || { passed: false, bestWpm: 0, bestAccuracy: 0 };
+
+  progress.exams[examId] = {
+    passed: prev.passed || passed,
+    bestWpm: Math.max(prev.bestWpm || 0, Math.round(wpm)),
+    bestAccuracy: Math.max(prev.bestAccuracy || 0, Math.round(accuracy)),
+    lastMode: mode,
+    lastSeconds: Math.round(seconds || 0),
+    lastWpm: Math.round(wpm),
+    lastAccuracy: Math.round(accuracy),
+    attemptedAt: new Date().toISOString()
+  };
+
+  // Stamp a certification date the first time the final exam is passed.
+  if (examId === 'FINAL' && passed && !progress.certifiedAt) {
+    progress.certifiedAt = new Date().toISOString();
+  }
+
+  saveProgress(progress);
+}
+
+function examPassed(examId, progress) {
+  return !!(progress.exams && progress.exams[examId] && progress.exams[examId].passed);
+}
+
+/** A module exam unlocks once every lesson in its level has at least 1 star. */
+function isModuleExamUnlocked(level, progress) {
+  const lessons = getLessonsForLevel(level);
+  return lessons.every(function(l) {
+    const r = progress.completedLessons[l.id];
+    return r && r.stars >= 1;
+  });
+}
+
+/** The final exam unlocks once all four module exams are passed. */
+function isFinalExamUnlocked(progress) {
+  return [1, 2, 3, 4].every(function(lvl) {
+    const exam = getExamForLevel(lvl);
+    return exam && examPassed(exam.id, progress);
+  });
+}
+
+/** Did the player pass an exam given a mode + scores? */
+function evaluateExam(exam, mode, accuracy, wpm) {
+  if (mode === 'accuracy') {
+    return accuracy >= EXAM_ACCURACY_ONLY_PASS;
+  }
+  return accuracy >= exam.passAccuracy && wpm >= exam.targetWPM;
 }
 
 /**
@@ -333,11 +414,12 @@ function isLessonUnlocked(lessonId, progress) {
 // ================================================================
 
 const views = {
-  profiles: document.getElementById('view-profiles'),
-  home:     document.getElementById('view-home'),
-  intro:    document.getElementById('view-intro'),
-  lesson:   document.getElementById('view-lesson'),
-  results:  document.getElementById('view-results')
+  profiles:     document.getElementById('view-profiles'),
+  home:         document.getElementById('view-home'),
+  intro:        document.getElementById('view-intro'),
+  'exam-intro': document.getElementById('view-exam-intro'),
+  lesson:       document.getElementById('view-lesson'),
+  results:      document.getElementById('view-results')
 };
 
 function showView(name) {
@@ -352,6 +434,8 @@ function showView(name) {
 // ================================================================
 
 function renderHome() {
+  state.activeExam = null;
+  state.examScoreMode = null;
   const progress = loadProgress();
   renderProfileChip();
   renderLevelSections(progress);
@@ -527,9 +611,66 @@ function renderLevelSections(progress) {
       grid.appendChild(card);
     });
 
+    // Module test card for this level
+    const exam = getExamForLevel(level.id);
+    if (exam) {
+      grid.appendChild(createExamCard(exam, progress, color));
+    }
+
     levelEl.appendChild(grid);
     container.appendChild(levelEl);
   });
+
+  // Final Exam section at the very end
+  const finalExam = getFinalExam();
+  const finalSection = document.createElement('div');
+  finalSection.className = 'level-section';
+  const finalHeader = document.createElement('div');
+  finalHeader.className = 'level-header';
+  finalHeader.innerHTML =
+    '<span class="level-title" style="color:var(--gold)">🏆 Final Exam</span>' +
+    '<span class="level-subtitle">Prove you can type</span>';
+  finalSection.appendChild(finalHeader);
+  const finalGrid = document.createElement('div');
+  finalGrid.className = 'lessons-grid';
+  finalGrid.appendChild(createExamCard(finalExam, progress, 'var(--gold)'));
+  finalSection.appendChild(finalGrid);
+  container.appendChild(finalSection);
+}
+
+/** Build a test/exam card for the home screen. */
+function createExamCard(exam, progress, accentColor) {
+  const unlocked = exam.isFinal
+    ? isFinalExamUnlocked(progress)
+    : isModuleExamUnlocked(exam.level, progress);
+  const passed = examPassed(exam.id, progress);
+  const rec = progress.exams && progress.exams[exam.id];
+
+  const card = document.createElement('div');
+  card.className = 'lesson-card exam-card'
+    + (unlocked ? ' unlocked' : ' locked')
+    + (passed ? ' passed' : '')
+    + (exam.isFinal ? ' final' : '');
+
+  const icon = exam.isFinal ? '🏆' : '📝';
+  const statusHtml = passed
+    ? `<div class="exam-status passed">✓ Passed${rec && rec.bestWpm ? ' · ' + rec.bestWpm + ' WPM' : ''}</div>`
+    : (unlocked
+        ? '<div class="exam-status ready">Ready</div>'
+        : '<div class="exam-status">Locked</div>');
+
+  card.innerHTML = `
+    <div class="card-exam-icon">${icon}</div>
+    <div class="card-title">${exam.title}</div>
+    <div class="card-exam-sub">${exam.subtitle}</div>
+    ${statusHtml}
+    ${!unlocked ? '<div class="card-lock">🔒</div>' : ''}
+  `;
+
+  if (unlocked) {
+    card.addEventListener('click', function() { showExamIntro(exam.id); });
+  }
+  return card;
 }
 
 function createLessonCard(lesson, progress, accentColor, nextId) {
@@ -701,7 +842,59 @@ function beginLesson(lessonId) {
   const lesson = getLessonById(lessonId);
   if (!lesson) return;
 
+  state.activeExam = null;
+  state.examScoreMode = null;
   state.lesson = lesson;
+  state.exerciseIndex = 0;
+  startExercise();
+}
+
+// ================================================================
+// EXAM INTRO + RUN
+// ================================================================
+
+/** Show the exam intro screen with the two test modes. */
+function showExamIntro(examId) {
+  const exam = getExamById(examId);
+  if (!exam) return;
+  state.activeExam = exam;
+
+  document.getElementById('exam-intro-title').textContent =
+    (exam.isFinal ? '🏆 ' : '📝 ') + exam.title;
+  document.getElementById('exam-intro-sub').textContent = exam.subtitle;
+  document.getElementById('exam-intro-desc').textContent = exam.intro;
+
+  // Requirement text on each mode button
+  document.getElementById('exam-req-accuracy').textContent =
+    'Pass at ' + EXAM_ACCURACY_ONLY_PASS + '%+ accuracy (any speed)';
+  document.getElementById('exam-req-speed').textContent =
+    'Pass at ' + exam.passAccuracy + '%+ accuracy AND ' + exam.targetWPM + '+ WPM';
+
+  // Wire the two mode buttons fresh
+  const accBtn = document.getElementById('btn-exam-accuracy');
+  const spdBtn = document.getElementById('btn-exam-speed');
+  accBtn.onclick = function() { beginExam(exam.id, 'accuracy'); };
+  spdBtn.onclick = function() { beginExam(exam.id, 'speed'); };
+
+  showView('exam-intro');
+}
+
+/** Start an exam in the chosen scoring mode. */
+function beginExam(examId, scoreMode) {
+  const exam = getExamById(examId);
+  if (!exam) return;
+
+  state.activeExam = exam;
+  state.examScoreMode = scoreMode;
+  // Reuse the lesson engine: present the exam as a one-"exercise" lesson.
+  state.lesson = {
+    id: exam.id,
+    title: exam.title,
+    level: exam.level || 4,
+    exercises: [exam.text],
+    targetWPM: exam.targetWPM,
+    __isExam: true
+  };
   state.exerciseIndex = 0;
   startExercise();
 }
@@ -734,15 +927,32 @@ function startExercise() {
 
   // Render lesson UI
   document.getElementById('lesson-title').textContent = lesson.title;
-  document.getElementById('lesson-exercise-counter').textContent =
-    `Exercise ${state.exerciseIndex + 1} of ${lesson.exercises.length}`;
+
+  const examing = inExam();
+  const lessonView = document.getElementById('view-lesson');
+  lessonView.classList.toggle('exam-mode', examing);
+
+  if (examing) {
+    document.getElementById('lesson-exercise-counter').textContent =
+      (state.examScoreMode === 'speed' ? 'Speed + Accuracy Test' : 'Accuracy Test');
+  } else {
+    document.getElementById('lesson-exercise-counter').textContent =
+      `Exercise ${state.exerciseIndex + 1} of ${lesson.exercises.length}`;
+  }
 
   updateProgressBar();
   renderTypingArea();
   updateStats();
 
-  // Highlight the first key on the keyboard
-  highlightKey(text[0]);
+  // Coaching (highlight next key + finger hint) only during lessons — an exam
+  // is a real test, so the learner gets no on-screen help.
+  if (examing) {
+    clearHighlights();
+    const hintEl = document.getElementById('finger-hint');
+    if (hintEl) hintEl.innerHTML = '';
+  } else {
+    highlightKey(text[0]);
+  }
 
   showView('lesson');
 }
@@ -787,7 +997,7 @@ function updateStats() {
     : 0;
 
   const wpm = elapsed > 0
-    ? Math.round((state.charIndex / 5) / elapsed)
+    ? Math.min(MAX_WPM, Math.round((state.charIndex / 5) / elapsed))
     : 0;
 
   const accuracy = state.totalKeystrokes > 0
@@ -848,7 +1058,7 @@ function handleKeyDown(e) {
       renderTypingArea();
       updateProgressBar();
       const nextChar = text[state.charIndex];
-      if (nextChar !== undefined) {
+      if (nextChar !== undefined && !inExam()) {
         highlightKey(nextChar);
       }
     }
@@ -871,18 +1081,20 @@ function handleKeyDown(e) {
     state.charIndex++;
 
     playCorrectSound();
-    flashKeyCorrect(expected);
+    if (!inExam()) flashKeyCorrect(expected);
 
     // Re-render typing area
     renderTypingArea();
     updateProgressBar();
     updateStats();
 
-    // Highlight next key
-    if (state.charIndex < text.length) {
-      highlightKey(text[state.charIndex]);
-    } else {
-      clearHighlights();
+    // Highlight next key (lessons only — exams give no help)
+    if (!inExam()) {
+      if (state.charIndex < text.length) {
+        highlightKey(text[state.charIndex]);
+      } else {
+        clearHighlights();
+      }
     }
 
     // Check if exercise complete
@@ -929,10 +1141,22 @@ function onExerciseComplete() {
     : 0.01;
 
   const charsTyped = state.exerciseText.length;
-  const wpm = Math.round((charsTyped / 5) / elapsed);
+  const wpm = Math.min(MAX_WPM, Math.round((charsTyped / 5) / elapsed));
   const accuracy = state.totalKeystrokes > 0
     ? Math.round(((state.totalKeystrokes - state.errorCount) / state.totalKeystrokes) * 100)
     : 100;
+  const seconds = Math.round(elapsed * 60);
+
+  // --- EXAM: single passage, evaluate pass/fail ---
+  if (inExam()) {
+    const exam = state.activeExam;
+    const passed = evaluateExam(exam, state.examScoreMode, accuracy, wpm);
+    state.results = { wpm, accuracy, seconds, passed, mode: state.examScoreMode };
+    recordExamResult(exam.id, state.examScoreMode, passed, wpm, accuracy, seconds);
+    if (passed) playLessonCompleteSound(); else playErrorSound();
+    setTimeout(showExamResults, 500);
+    return;
+  }
 
   // Check if more exercises remain in this lesson
   const lesson = state.lesson;
@@ -947,9 +1171,9 @@ function onExerciseComplete() {
   } else {
     // All exercises done — show results
     const stars = calculateStars(accuracy, wpm, lesson.targetWPM);
-    state.results = { wpm, accuracy, seconds: Math.round(elapsed * 60), stars };
+    state.results = { wpm, accuracy, seconds, stars };
 
-    recordLessonCompletion(lesson.id, stars, wpm, accuracy);
+    recordLessonCompletion(lesson.id, stars, wpm, accuracy, seconds);
 
     playLessonCompleteSound();
 
@@ -975,6 +1199,13 @@ function calculateStars(accuracy, wpm, targetWPM) {
 
 function showResults() {
   const { wpm, accuracy, seconds, stars } = state.results;
+
+  // Reset to lesson chrome (in case the last view was an exam result)
+  document.getElementById('results-title').textContent = 'Lesson Complete!';
+  document.getElementById('results-exam-banner').classList.add('hidden');
+  document.getElementById('results-certificate').classList.add('hidden');
+  document.getElementById('results-stars').classList.remove('hidden');
+  document.getElementById('btn-try-again').textContent = 'Try Again';
 
   // Lesson name
   document.getElementById('results-lesson-name').textContent = state.lesson.title;
@@ -1019,6 +1250,80 @@ function showResults() {
   showView('results');
 }
 
+/**
+ * Exam results — pass/fail, recorded accuracy + time + speed, and a
+ * certificate when the final exam is passed.
+ */
+function showExamResults() {
+  const exam = state.activeExam;
+  const { wpm, accuracy, seconds, passed, mode } = state.results;
+
+  // Stats
+  document.getElementById('results-wpm').textContent = wpm;
+  document.getElementById('results-accuracy').textContent = accuracy + '%';
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  document.getElementById('results-time').textContent =
+    mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
+  // Hide the stars row — exams use a pass/fail banner instead
+  document.getElementById('results-stars').classList.add('hidden');
+
+  document.getElementById('results-lesson-name').textContent =
+    exam.title + ' · ' + (mode === 'speed' ? 'Speed + Accuracy' : 'Accuracy');
+
+  // Title + banner
+  const titleEl = document.getElementById('results-title');
+  const banner = document.getElementById('results-exam-banner');
+  banner.classList.remove('hidden');
+
+  const requirement = (mode === 'accuracy')
+    ? 'Needed: ' + EXAM_ACCURACY_ONLY_PASS + '%+ accuracy'
+    : 'Needed: ' + exam.passAccuracy + '%+ accuracy and ' + exam.targetWPM + '+ WPM';
+
+  if (passed) {
+    titleEl.textContent = exam.isFinal ? 'Certified! 🏆' : 'Test Passed! 🎉';
+    banner.className = 'results-exam-banner pass';
+    banner.textContent = '✓ PASSED — ' + requirement;
+  } else {
+    titleEl.textContent = 'Almost There!';
+    banner.className = 'results-exam-banner fail';
+    banner.textContent = '✗ Not yet — ' + requirement + '. Keep practicing and try again!';
+  }
+
+  // Certificate for a passed final exam
+  const cert = document.getElementById('results-certificate');
+  if (exam.isFinal && passed) {
+    const ap = getActiveProfile();
+    const name = ap ? ap.name : 'Typist';
+    const dateStr = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    cert.innerHTML =
+      '<div class="cert-banner">🏆 Certificate of Typing 🏆</div>' +
+      '<div class="cert-name">' + name + '</div>' +
+      '<div class="cert-text">has completed KeyQuest and can type with ' +
+      accuracy + '% accuracy at ' + wpm + ' WPM.</div>' +
+      '<div class="cert-date">' + dateStr + '</div>' +
+      '<div class="cert-sign">Developed by Coniker Systems · v' + APP_VERSION + '</div>';
+    cert.classList.remove('hidden');
+  } else {
+    cert.classList.add('hidden');
+  }
+
+  // Message
+  document.getElementById('results-message').textContent = passed
+    ? (exam.isFinal
+        ? 'Incredible! You finished the whole program. You are a real typist now!'
+        : 'Great work — you passed this test. On to the next challenge!')
+    : 'So close! Practice the lessons a little more, then take the test again.';
+
+  // Buttons: retake this test, no "next lesson"
+  document.getElementById('btn-next-lesson').classList.add('hidden');
+  const tryBtn = document.getElementById('btn-try-again');
+  tryBtn.textContent = 'Try Test Again';
+
+  showView('results');
+}
+
 // ================================================================
 // BUTTON HANDLERS
 // ================================================================
@@ -1029,6 +1334,11 @@ function setupButtonHandlers() {
     renderHome();
   });
 
+  // Exam intro — back to home
+  document.getElementById('btn-exam-back').addEventListener('click', function() {
+    renderHome();
+  });
+
   // Lesson screen — back to home
   document.getElementById('btn-back-home').addEventListener('click', function() {
     clearInterval(state.timerInterval);
@@ -1036,8 +1346,12 @@ function setupButtonHandlers() {
     renderHome();
   });
 
-  // Results screen — try again
+  // Results screen — try again (re-open the exam, or retry the lesson)
   document.getElementById('btn-try-again').addEventListener('click', function() {
+    if (inExam() && state.activeExam) {
+      showExamIntro(state.activeExam.id);
+      return;
+    }
     startLesson(state.lesson.id);
   });
 
@@ -1098,16 +1412,39 @@ window.addEventListener('keydown', handleKeyDown, { passive: false });
 // ================================================================
 
 function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    // Relative path so it registers correctly under a subfolder (GitHub Pages).
-    navigator.serviceWorker.register('sw.js')
-      .then(function(reg) {
-        console.log('[KeyQuest] Service worker registered:', reg.scope);
-      })
-      .catch(function(err) {
-        console.warn('[KeyQuest] Service worker registration failed:', err);
-      });
+  if (!('serviceWorker' in navigator)) return;
+
+  // Don't cache during local development — caching makes the dev preview serve
+  // stale files. Also self-heal: tear down any existing worker + caches so a
+  // previously-installed dev worker stops intercepting requests.
+  const host = location.hostname;
+  const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host === '';
+  if (isLocal) {
+    navigator.serviceWorker.getRegistrations().then(function(regs) {
+      regs.forEach(function(r) { r.unregister(); });
+    });
+    if (window.caches) {
+      caches.keys().then(function(keys) { keys.forEach(function(k) { caches.delete(k); }); });
+    }
+    return;
   }
+
+  // Production (e.g. GitHub Pages) — register for offline use.
+  navigator.serviceWorker.register('sw.js')
+    .then(function(reg) {
+      console.log('[KeyQuest] Service worker registered:', reg.scope);
+    })
+    .catch(function(err) {
+      console.warn('[KeyQuest] Service worker registration failed:', err);
+    });
+}
+
+/** Write "Developed by Coniker Systems · vX.Y.Z" into every credit line. */
+function stampVersion() {
+  const label = 'Developed by Coniker Systems · v' + APP_VERSION;
+  document.querySelectorAll('.app-credit, .about-credit').forEach(function(el) {
+    el.textContent = label;
+  });
 }
 
 // ================================================================
@@ -1124,6 +1461,9 @@ function boot() {
 
   // Wire up all static button handlers
   setupButtonHandlers();
+
+  // Stamp the version into the footer credits
+  stampVersion();
 
   // Bring any old single-profile save forward into a profile
   migrateLegacyProgress();

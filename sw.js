@@ -4,7 +4,7 @@
  * reach devices), full offline support from cache.
  */
 
-const CACHE_NAME = 'keyquest-v8';
+const CACHE_NAME = 'keyquest-v10';
 
 // All files to cache for offline use.
 // Relative paths (./) so the app works from any folder — e.g. GitHub Pages

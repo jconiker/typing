@@ -568,3 +568,85 @@ function getLessonsForLevel(levelId) {
 function getLevelForLesson(lessonId) {
   return LEVELS.find(lv => lessonId >= lv.lessonRange[0] && lessonId <= lv.lessonRange[1]);
 }
+
+// ================================================================
+// EXAMS — modular tests, one per level + a final exam.
+//
+// Each exam is a single continuous passage (one timer, one score).
+// Two ways to pass (chosen by the learner before starting):
+//   • Accuracy Test     → accuracy >= EXAM_ACCURACY_ONLY_PASS (speed ignored)
+//   • Speed + Accuracy   → accuracy >= passAccuracy AND wpm >= targetWPM
+// targetWPM rises across modules so speed expectations progress.
+// Passages only use keys taught up to and including that level.
+// ================================================================
+
+const EXAM_ACCURACY_ONLY_PASS = 95;
+
+const EXAMS = [
+  {
+    id: 'L1',
+    level: 1,
+    title: 'Level 1 Test',
+    subtitle: 'Home Row',
+    targetWPM: 10,
+    passAccuracy: 90,
+    intro: 'Show what you learned on the home row. Keep your fingers on F and J — no peeking at the keyboard!',
+    text: 'a sad lad asks dad; all lads fall fast; dad adds a salad; flasks fall off; a lass asks all dads; sad lads ask a glad dad.'
+  },
+  {
+    id: 'L2',
+    level: 2,
+    title: 'Level 2 Test',
+    subtitle: 'Top Row',
+    targetWPM: 14,
+    passAccuracy: 90,
+    intro: 'Time to test the top row keys you added. Type the words you know without looking down.',
+    text: 'you type quietly as your ideas pour out; we write true poetry; try a tidy ruler; pour out water; edit your paper; their party was a quiet treat.'
+  },
+  {
+    id: 'L3',
+    level: 3,
+    title: 'Level 3 Test',
+    subtitle: 'Full Keyboard',
+    targetWPM: 18,
+    passAccuracy: 90,
+    intro: 'You know every letter now. Type these full sentences with capitals off — just lowercase letters and punctuation.',
+    text: 'the clever brown fox jumped over a lazy dog. six quick zebras grazed near the big quiet pond, while the happy jaguar watched them from a shady rock.'
+  },
+  {
+    id: 'L4',
+    level: 4,
+    title: 'Level 4 Test',
+    subtitle: 'Numbers & Capitals',
+    targetWPM: 22,
+    passAccuracy: 90,
+    intro: 'The full test — capital letters, numbers, and punctuation, just like real writing.',
+    text: 'On June 7, 2026, the Tigers scored 21 points in 4 quarters. My friend Max ran 3 miles in 25 minutes at Oak Park. We left at 6:30 and got home by 8.'
+  },
+  {
+    id: 'FINAL',
+    level: null,
+    isFinal: true,
+    title: 'Final Exam',
+    subtitle: 'Type a Page',
+    targetWPM: 20,
+    passAccuracy: 92,
+    intro: 'This is it — a full page of real writing with letters, capitals, and numbers. Pass this and you are a certified typist!',
+    text: 'Learning to type well is a skill you will use for the rest of your life. When you can type without looking at your hands, you can write your ideas almost as fast as you think them. Practice for 10 minutes a day, keep your fingers resting on the home row, and watch your speed climb week after week. You have worked hard to get here, and now you can truly type. Great job!'
+  }
+];
+
+/** Get an exam by its id ('L1'..'L4', 'FINAL'). */
+function getExamById(id) {
+  return EXAMS.find(e => e.id === id);
+}
+
+/** Get the module exam for a given level number (1-4), or undefined. */
+function getExamForLevel(levelId) {
+  return EXAMS.find(e => e.level === levelId && !e.isFinal);
+}
+
+/** The final exam object. */
+function getFinalExam() {
+  return EXAMS.find(e => e.isFinal);
+}

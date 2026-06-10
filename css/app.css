@@ -1083,6 +1083,8 @@ html, body {
   gap: 24px;
   padding: 32px;
   background: var(--bg);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .results-header {
@@ -1430,4 +1432,176 @@ html, body {
   letter-spacing: 0.04em;
   color: var(--text-dim);
   margin-top: 16px;
+}
+
+/* ================================================================
+   EXAM / TEST CARDS
+   ================================================================ */
+.exam-card {
+  background: linear-gradient(180deg, rgba(74,158,255,0.07), var(--panel));
+  border-style: dashed;
+}
+
+.exam-card.passed {
+  border-style: solid;
+  border-color: rgba(0, 200, 150, 0.55);
+  background: linear-gradient(180deg, rgba(0,200,150,0.1), var(--panel));
+}
+
+.exam-card.final {
+  background: linear-gradient(180deg, rgba(240,165,0,0.12), var(--panel));
+}
+
+.card-exam-icon { font-size: 1.8rem; line-height: 1; }
+
+.card-exam-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.exam-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+.exam-status.ready { color: var(--blue); }
+.exam-status.passed { color: var(--green); }
+
+/* ================================================================
+   EXAM INTRO — mode picker
+   ================================================================ */
+.exam-note {
+  background: rgba(240, 165, 0, 0.08);
+  border: 1.5px solid rgba(240, 165, 0, 0.25);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  font-size: 0.92rem;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.exam-note strong { color: var(--gold); }
+
+.exam-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.exam-mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+  background: var(--panel);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  cursor: pointer;
+  color: var(--text);
+  font-family: var(--font-ui);
+  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.exam-mode-btn:hover {
+  transform: translateY(-3px);
+  border-color: var(--gold);
+  box-shadow: 0 6px 20px rgba(240, 165, 0, 0.25);
+}
+
+.exam-mode-icon { font-size: 2rem; line-height: 1; }
+.exam-mode-title { font-size: 1.15rem; font-weight: 800; }
+.exam-mode-req { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
+
+/* ================================================================
+   EXAM MODE — no coaching during a test
+   ================================================================ */
+#view-lesson.exam-mode #finger-hint,
+#view-lesson.exam-mode #finger-legend {
+  display: none;
+}
+
+#view-lesson.exam-mode #keyboard-container {
+  opacity: 0.32;            /* keyboard stays for reference but clearly muted */
+  filter: grayscale(0.5);
+}
+
+#view-lesson.exam-mode #lesson-exercise-counter {
+  color: var(--gold);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ================================================================
+   EXAM RESULTS — pass/fail banner + certificate
+   ================================================================ */
+.results-exam-banner {
+  font-size: 1.05rem;
+  font-weight: 800;
+  padding: 12px 22px;
+  border-radius: 999px;
+  text-align: center;
+  max-width: 90%;
+}
+
+.results-exam-banner.pass {
+  background: rgba(0, 200, 150, 0.18);
+  color: var(--green);
+  border: 1.5px solid rgba(0, 200, 150, 0.5);
+}
+
+.results-exam-banner.fail {
+  background: rgba(231, 76, 60, 0.16);
+  color: var(--red);
+  border: 1.5px solid rgba(231, 76, 60, 0.45);
+}
+
+.results-certificate {
+  background: linear-gradient(180deg, #1b2740, var(--panel));
+  border: 2px solid var(--gold);
+  border-radius: var(--radius-lg);
+  padding: 24px 32px;
+  text-align: center;
+  max-width: 520px;
+  box-shadow: 0 0 40px rgba(240, 165, 0, 0.25);
+}
+
+.cert-banner {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cert-name {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 10px 0 6px;
+}
+
+.cert-text {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.cert-date {
+  font-size: 0.85rem;
+  color: var(--text);
+  margin-top: 12px;
+}
+
+.cert-sign {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 6px;
+  letter-spacing: 0.04em;
 }

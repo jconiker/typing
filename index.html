@@ -14,8 +14,8 @@
   <!-- App Icons for iOS home screen -->
   <link rel="apple-touch-icon" href="icons/icon-192.svg">
 
-  <!-- App Stylesheet — no external dependencies -->
-  <link rel="stylesheet" href="css/app.css">
+  <!-- App Stylesheet — ?v= cache-busts on each release (keep in sync with APP_VERSION) -->
+  <link rel="stylesheet" href="css/app.css?v=1.0.0">
 
   <title>KeyQuest — Learn to Type</title>
 </head>
@@ -138,6 +138,40 @@
 
 
   <!-- ==============================================================
+       VIEW 2b: EXAM INTRO — pick a test mode
+       ============================================================== -->
+  <div id="view-exam-intro" class="view hidden">
+    <div class="intro-container">
+      <div class="intro-header">
+        <button id="btn-exam-back" class="btn-back" aria-label="Back to home">← Back</button>
+        <div class="intro-level-badge" id="exam-intro-sub">Test</div>
+      </div>
+
+      <h1 class="intro-title" id="exam-intro-title">Level Test</h1>
+      <p class="intro-subtitle" id="exam-intro-desc"></p>
+
+      <div class="exam-note">
+        🔒 This is a <strong>test</strong> — the keyboard won't show you the next key or
+        finger. Type carefully and try not to look at your hands!
+      </div>
+
+      <div class="exam-modes">
+        <button class="exam-mode-btn" id="btn-exam-accuracy">
+          <span class="exam-mode-icon">🎯</span>
+          <span class="exam-mode-title">Accuracy Test</span>
+          <span class="exam-mode-req" id="exam-req-accuracy"></span>
+        </button>
+        <button class="exam-mode-btn" id="btn-exam-speed">
+          <span class="exam-mode-icon">⚡</span>
+          <span class="exam-mode-title">Speed + Accuracy</span>
+          <span class="exam-mode-req" id="exam-req-speed"></span>
+        </button>
+      </div>
+    </div>
+  </div><!-- /#view-exam-intro -->
+
+
+  <!-- ==============================================================
        VIEW 3: LESSON / TYPING SCREEN
        ============================================================== -->
   <div id="view-lesson" class="view hidden">
@@ -196,12 +230,18 @@
 
     <!-- Header -->
     <div class="results-header">
-      <div class="results-title">Lesson Complete!</div>
+      <div class="results-title" id="results-title">Lesson Complete!</div>
       <div class="results-lesson-name" id="results-lesson-name"></div>
     </div>
 
-    <!-- Animated Star Rating -->
-    <div class="results-stars" aria-label="Star rating" role="img">
+    <!-- Exam pass/fail banner (exams only) -->
+    <div id="results-exam-banner" class="results-exam-banner hidden"></div>
+
+    <!-- Final-exam certificate (final exam pass only) -->
+    <div id="results-certificate" class="results-certificate hidden"></div>
+
+    <!-- Animated Star Rating (lessons only) -->
+    <div class="results-stars" id="results-stars" aria-label="Star rating" role="img">
       <span class="result-star" aria-label="Star 1">★</span>
       <span class="result-star" aria-label="Star 2">★</span>
       <span class="result-star" aria-label="Star 3">★</span>
@@ -278,13 +318,13 @@
        Share + Feedback are handled by the reusable js/feedback.js widget,
        triggered from the header buttons (noFab — no floating button).
        ============================================================== -->
-  <script src="js/lessons.js"></script>
-  <script src="js/keyboard.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/lessons.js?v=1.0.0"></script>
+  <script src="js/keyboard.js?v=1.0.0"></script>
+  <script src="js/app.js?v=1.0.0"></script>
   <script>
-    window.APP_INFO = { name: "KeyQuest", url: "https://jconiker.github.io/typing/", email: "joeconiker@gmail.com", noFab: true };
+    window.APP_INFO = { name: "KeyQuest", url: "https://jconiker.github.io/typing/", email: "joeconiker@gmail.com", noFab: true, version: "1.0.0" };
   </script>
-  <script src="js/feedback.js"></script>
+  <script src="js/feedback.js?v=1.0.0"></script>
 
 </body>
 </html>
