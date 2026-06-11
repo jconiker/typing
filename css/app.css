@@ -1621,7 +1621,11 @@ html, body {
    All rules are scoped to body.about-page so they never affect the
    in-app About modal (which reuses some of the same class names).
    ================================================================ */
-body.about-page { overflow: auto; height: auto; min-height: 100%; display: block; }
+/* The base stylesheet pins html/body to 100% height + overflow:hidden (for the
+   in-app SPA). The standalone About page must scroll normally, so override BOTH
+   the <html class="about-doc"> and its body. */
+html.about-doc, html.about-doc body.about-page { height: auto; min-height: 100%; overflow: visible; -webkit-overflow-scrolling: touch; }
+body.about-page { display: block; }
 body.about-page header.about-bar { height: 56px; display: flex; align-items: center; justify-content: space-between;
   padding: env(safe-area-inset-top) 16px 0; background: var(--panel); border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 100; }
