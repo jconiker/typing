@@ -186,8 +186,18 @@ html, body {
 }
 
 .lesson-card.locked {
-  opacity: 0.5;
-  cursor: not-allowed;
+  opacity: 0.55;
+  cursor: pointer;            /* tap a locked lesson to unlock it */
+}
+.lesson-card.locked:active {
+  opacity: 0.78;
+}
+.card-unlock-hint {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin-top: 6px;
+  letter-spacing: 0.03em;
 }
 
 .lesson-card.completed {

@@ -10,8 +10,8 @@
   <title>About · KeyQuest</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.svg" />
-  <link rel="stylesheet" href="css/app.css?v=1.1.0" />
-  <script src="js/version.js?v=1.1.0"></script>
+  <link rel="stylesheet" href="css/app.css?v=1.2.0" />
+  <script src="js/version.js?v=1.2.0"></script>
 </head>
 <body class="about-page">
   <header class="about-bar">
@@ -160,28 +160,32 @@
       if (navigator.share) {
         try { await navigator.share({ title: "About KeyQuest", text: SHARE_TEXT, url: ABOUT_URL }); return; } catch (e) { return; }
       }
+      // No native share sheet (e.g. desktop): copy the link to paste anywhere.
       try { await navigator.clipboard.writeText(SHARE_TEXT); alert("Link copied — paste it into a text or email."); }
-      catch (e) { window.location.href = "sms:?&body=" + encodeURIComponent(SHARE_TEXT); }
+      catch (e) { window.prompt("Copy this link:", ABOUT_URL); }
     };
 
-    // Download PDF — NEVER navigate the window (in a Home-Screen app that traps
-    // the user with no way back). Use the iOS share sheet (an overlay) so they
-    // can Save to Files / share and return straight to the app.
-    var standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+    // Download PDF — save the file to the device (sharing is handled by the
+    // Share button). Fetch the file and trigger a download via a blob URL, which
+    // saves to Files/Downloads without navigating the window.
     document.getElementById("pdf-btn").onclick = async function () {
+      const btn = this;
+      btn.textContent = "Preparing…";
       try {
-        const res = await fetch("keyquest-about.pdf", { cache: "force-cache" });
+        const res = await fetch("keyquest-about.pdf", { cache: "reload" });
         const blob = await res.blob();
-        const file = new File([blob], "KeyQuest.pdf", { type: "application/pdf" });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: "KeyQuest" });
-          return;
-        }
-      } catch (e) { /* fall through */ }
-      if (navigator.share) { try { await navigator.share({ title: "KeyQuest PDF", url: PDF_URL }); return; } catch (e) { return; } }
-      if (!standalone) { window.open("keyquest-about.pdf", "_blank"); return; }
-      try { await navigator.clipboard.writeText(PDF_URL); alert("PDF link copied — open it in Safari."); }
-      catch (e) { window.prompt("Open this PDF link in Safari:", PDF_URL); }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "KeyQuest.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      } catch (e) {
+        alert("Couldn't prepare the PDF — check your connection and try again.");
+      }
+      btn.textContent = "Download PDF";
     };
   </script>
 </body>

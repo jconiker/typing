@@ -295,13 +295,14 @@ function loadProgress() {
         completedLessons: parsed.completedLessons || {},
         totalSessions: parsed.totalSessions || 0,
         exams: parsed.exams || {},
+        forceUnlocked: parsed.forceUnlocked || {},
         certifiedAt: parsed.certifiedAt || null
       };
     }
   } catch (e) {
     console.warn('[KeyQuest] Could not load progress:', e);
   }
-  return { completedLessons: {}, totalSessions: 0, exams: {}, certifiedAt: null };
+  return { completedLessons: {}, totalSessions: 0, exams: {}, forceUnlocked: {}, certifiedAt: null };
 }
 
 /**
@@ -405,8 +406,25 @@ function evaluateExam(exam, mode, accuracy, wpm) {
  */
 function isLessonUnlocked(lessonId, progress) {
   if (lessonId === 1) return true;
+  // Manually unlocked (tapped a locked lesson) — start here and continue forward.
+  if (progress.forceUnlocked && progress.forceUnlocked[lessonId]) return true;
   const prev = progress.completedLessons[lessonId - 1];
   return !!(prev && prev.stars >= 1);
+}
+
+/**
+ * Tap-to-unlock: let a learner jump ahead. Unlocks just this one lesson (they
+ * then continue forward on the normal path). Mirrors Simpli Piano's behavior.
+ */
+function unlockLesson(lessonId) {
+  const lesson = LESSONS.find(function(l) { return l.id === lessonId; });
+  const title = lesson ? lesson.title : ('Lesson ' + lessonId);
+  if (!confirm('Unlock “' + title + '”?\n\nYou can start here and keep going forward from this point.')) return;
+  const progress = loadProgress();
+  if (!progress.forceUnlocked) progress.forceUnlocked = {};
+  progress.forceUnlocked[lessonId] = true;
+  saveProgress(progress);
+  renderHome();
 }
 
 // ================================================================
@@ -728,11 +746,14 @@ function createLessonCard(lesson, progress, accentColor, nextId) {
     <div class="card-number">${lesson.id}</div>
     <div class="card-title">${lesson.title}</div>
     <div class="card-stars">${starsHtml}${wpmBadge}</div>
-    ${!unlocked ? '<div class="card-lock">🔒</div>' : ''}
+    ${!unlocked ? '<div class="card-lock">🔒</div><div class="card-unlock-hint">Tap to unlock</div>' : ''}
   `;
 
   if (unlocked) {
     card.addEventListener('click', function() { startLesson(lesson.id); });
+  } else {
+    // Tap a locked lesson to unlock it (confirm first), then continue forward.
+    card.addEventListener('click', function() { unlockLesson(lesson.id); });
   }
 
   return card;
