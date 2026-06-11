@@ -22,7 +22,7 @@
 // have. IMPORTANT: when you ship an update, bump this AND the ?v= query on the
 // <script>/<link> tags in index.html (they cache-bust assets) AND CACHE_NAME
 // in sw.js. Keeping them in lockstep is what guarantees devices get the update.
-const APP_VERSION = '1.0.0';
+const APP_VERSION = window.APP_VERSION || '1.0.0';
 
 // Legacy single-profile key (migrated into a profile on first run).
 const LEGACY_PROGRESS_KEY = 'keyquest_progress';
@@ -559,11 +559,32 @@ function selectProfile(id) {
 // ================================================================
 
 function openAbout() {
-  document.getElementById('about-overlay').classList.remove('hidden');
+  // Standard: the About page is its own URL (shareable, prints to a PDF flyer).
+  // Same-origin in-app navigation is safe inside a standalone PWA.
+  window.location.href = 'about.html';
 }
 
 function closeAbout() {
   document.getElementById('about-overlay').classList.add('hidden');
+}
+
+// ---- Update button: force-pull the latest version ----
+// iOS often resumes an installed (Home-Screen) app from memory instead of
+// reloading, so it never sees a new release. This updates the service worker,
+// clears caches, and does a cache-busted reload. Needs the network.
+function updateApp(btn) {
+  if (!navigator.onLine) { alert('Connect to Wi-Fi or cellular, then tap Update again.'); return; }
+  if (btn) btn.textContent = '🔄 Updating…';
+  (async function () {
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(function (r) { return r.update().catch(function () {}); }));
+      }
+      if (window.caches) { const ks = await caches.keys(); await Promise.all(ks.map(function (k) { return caches.delete(k); })); }
+    } catch (e) { /* ignore */ }
+    location.href = 'index.html?u=' + Date.now();
+  })();
 }
 
 /**
@@ -1303,7 +1324,7 @@ function showExamResults() {
       '<div class="cert-text">has completed KeyQuest and can type with ' +
       accuracy + '% accuracy at ' + wpm + ' WPM.</div>' +
       '<div class="cert-date">' + dateStr + '</div>' +
-      '<div class="cert-sign">Developed by Coniker Systems · v' + APP_VERSION + '</div>';
+      '<div class="cert-sign">Coniker Systems™ · v' + APP_VERSION + '</div>';
     cert.classList.remove('hidden');
   } else {
     cert.classList.add('hidden');
@@ -1374,6 +1395,11 @@ function setupButtonHandlers() {
     if (window.Feedback) window.Feedback.open();
   });
 
+  // Home — force-pull the latest version (iOS resume gotcha)
+  document.getElementById('btn-update').addEventListener('click', function() {
+    updateApp(this);
+  });
+
   // Home — about
   document.getElementById('btn-about').addEventListener('click', openAbout);
   document.getElementById('btn-about-close').addEventListener('click', closeAbout);
@@ -1439,9 +1465,9 @@ function registerServiceWorker() {
     });
 }
 
-/** Write "Developed by Coniker Systems · vX.Y.Z" into every credit line. */
+/** Write "© <year> Coniker Systems™ · vX.Y.Z" into every credit line. */
 function stampVersion() {
-  const label = 'Developed by Coniker Systems · v' + APP_VERSION;
+  const label = '© ' + new Date().getFullYear() + ' Coniker Systems™ · v' + APP_VERSION;
   document.querySelectorAll('.app-credit, .about-credit').forEach(function(el) {
     el.textContent = label;
   });

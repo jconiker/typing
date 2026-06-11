@@ -1297,7 +1297,7 @@ html, body {
 .intro-key-tile:nth-child(8) { animation: keyTilePulse 2.4s ease-in-out 1.4s infinite; }
 
 /* ================================================================
-   CREDIT LINE — "Developed by Coniker Systems"
+   CREDIT LINE — "© <year> Coniker Systems™ · v<version>"
    ================================================================ */
 .app-credit {
   flex-shrink: 0;
@@ -1604,4 +1604,70 @@ html, body {
   color: var(--text-dim);
   margin-top: 6px;
   letter-spacing: 0.04em;
+}
+
+/* ================================================================
+   ABOUT PAGE (Coniker Systems standard) — standalone about.html.
+   All rules are scoped to body.about-page so they never affect the
+   in-app About modal (which reuses some of the same class names).
+   ================================================================ */
+body.about-page { overflow: auto; height: auto; min-height: 100%; display: block; }
+body.about-page header.about-bar { height: 56px; display: flex; align-items: center; justify-content: space-between;
+  padding: env(safe-area-inset-top) 16px 0; background: var(--panel); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100; }
+body.about-page .logo-wrap { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; }
+body.about-page .logo-wrap .logo-emoji { font-size: 24px; }
+body.about-page .nav { display: flex; align-items: center; gap: 10px; }
+body.about-page .chip { font-family: var(--font-ui); font-size: 0.85rem; font-weight: 700; text-decoration: none;
+  background: var(--bg); border: 1.5px solid var(--border); color: var(--text); border-radius: 22px; padding: 8px 14px;
+  cursor: pointer; display: inline-flex; align-items: center; }
+body.about-page .chip:hover { border-color: var(--gold); color: var(--gold); }
+body.about-page .about-main { max-width: 760px; margin: 0 auto; padding: 36px 22px 60px; }
+body.about-page .about-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: clamp(22px, 5vw, 44px); max-height: none; overflow: visible; box-shadow: none; }
+body.about-page .about-hero { text-align: center; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+body.about-page .about-hero .about-logo { width: 64px; height: 64px; border-radius: 16px; margin: 0 auto 16px; display: grid;
+  place-items: center; font-size: 34px; background: var(--bg); border: 1px solid var(--border); border-bottom: 5px solid var(--gold); }
+body.about-page .about-hero h1 { font-size: 34px; font-weight: 800; letter-spacing: -0.5px; margin: 0 0 8px; }
+body.about-page .about-tagline { font-size: 19px; font-weight: 600; color: var(--text); margin: 0 0 6px; }
+body.about-page .about-sub { font-size: 15px; color: var(--text-muted); margin: 0; }
+body.about-page .about-section { margin-bottom: 40px; }
+body.about-page .about-section h2 { font-size: 16px; font-weight: 700; margin: 0 0 14px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.04em; }
+body.about-page .about-section p { font-size: 15px; line-height: 1.75; color: #c2cfdd; margin: 0 0 12px; }
+body.about-page .about-section b { color: var(--text); }
+body.about-page .audience-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 560px) { body.about-page .audience-grid { grid-template-columns: 1fr; } }
+body.about-page .audience-item { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+body.about-page .audience-icon { font-size: 22px; margin-bottom: 8px; }
+body.about-page .audience-label { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+body.about-page .audience-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+body.about-page .why-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media (max-width: 600px) { body.about-page .why-grid { grid-template-columns: 1fr; } }
+body.about-page .why-item { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+body.about-page .why-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+body.about-page .why-desc { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
+body.about-page .get-steps { margin: 8px 0 8px 4px; padding-left: 22px; color: #c2cfdd; line-height: 1.9; font-size: 15px; }
+body.about-page .get-steps b { color: var(--text); }
+body.about-page .get-tip { font-size: 13.5px; color: var(--text-muted); }
+body.about-page .about-cta { text-align: center; margin: 40px 0 8px; }
+body.about-page .process-btn { display: inline-block; text-decoration: none; padding: 14px 32px; background: var(--gold);
+  color: #1a1207; border: none; border-radius: 999px; font-size: 16px; font-weight: 700; cursor: pointer; }
+body.about-page .about-brand { margin-top: 30px; }
+body.about-page .brand-divider { height: 1px; background: var(--border); margin-bottom: 18px; }
+body.about-page .brand-line { font-size: 13px; color: var(--text-muted); text-align: center; }
+body.about-page .brand-link { color: var(--text-muted); text-decoration: none; }
+body.about-page .brand-link:hover { color: var(--gold); }
+body.about-page .brand-sep { margin: 0 8px; }
+
+@media print {
+  html, body.about-page { height: auto !important; min-height: 0 !important; overflow: visible !important; }
+  body.about-page { background: #fff !important; color: #111 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body.about-page header.about-bar, body.about-page .about-cta { display: none !important; }
+  body.about-page .about-section, body.about-page .why-item, body.about-page .audience-item { page-break-inside: avoid; }
+  body.about-page .about-card { border: none !important; padding: 0 !important; background: #fff !important; box-shadow: none !important; }
+  body.about-page .about-hero h1, body.about-page .about-tagline, body.about-page .about-section h2,
+  body.about-page .about-section p, body.about-page .about-section b, body.about-page .audience-label,
+  body.about-page .audience-desc, body.about-page .why-title, body.about-page .why-desc,
+  body.about-page .brand-line, body.about-page .get-steps { color: #111 !important; }
+  body.about-page .audience-item, body.about-page .why-item { background: #f5f5f5 !important; border-color: #ccc !important; }
 }
